@@ -131,8 +131,16 @@
 
   <dialog id="scanner-dialog">
     <div class="scanner-head"><strong>ISBN 바코드 촬영</strong><button id="close-scanner" class="icon-button" type="button" aria-label="카메라 닫기">×</button></div>
-    <video id="scanner-video" playsinline muted></video>
-    <p id="scanner-status">책 뒤표지 바코드를 화면 중앙에 맞춰주세요.</p>
+    <div class="scanner-viewport">
+      <video id="scanner-video" playsinline muted></video>
+      <div class="scan-guide" aria-hidden="true"></div>
+    </div>
+    <div class="camera-controls">
+      <button id="refocus-camera" class="button ghost" type="button">초점 다시 맞추기</button>
+      <button id="toggle-torch" class="button ghost" type="button" hidden>조명 켜기</button>
+      <label id="zoom-control" hidden>확대 <input id="camera-zoom" type="range" min="1" max="1" step="0.1" value="1"></label>
+    </div>
+    <p id="scanner-status">책에서 15~25cm 떨어진 뒤 바코드를 네모 안에 맞춰주세요.</p>
   </dialog>
 
   <div id="toast" role="status" aria-live="polite"></div>

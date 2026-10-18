@@ -10,6 +10,11 @@ import {
   removeBook,
   upsertBook,
 } from './domain.js';
+import {
+  buildCameraConstraints,
+  googleBookToMetadata,
+  millieSearchUrl,
+} from './integrations.js';
 
 const STORAGE_KEY = 'daejeon-bookshelf.v1';
 const millieLabels = { unchecked: '밀리 확인 전', full: '밀리 완전판', partial: '밀리 일부·요약', not_found: '밀리 없음' };
@@ -33,7 +38,9 @@ const elements = {
 let books = loadBooks();
 let draftCoverUrl = '';
 let scannerStream = null;
+let scannerTrack = null;
 let scannerTimer = null;
+let torchOn = false;
 
 function loadBooks() {
   try {
@@ -241,42 +248,64 @@ function formBook() {
   return createBook(input);
 }
 
+function applyBookMetadata(metadata) {
+  if (!metadata) return false;
+  $('#title').value = metadata.title || '';
+  $('#author').value = metadata.author || '';
+  $('#publisher').value = metadata.publisher || '';
+  draftCoverUrl = metadata.coverUrl || '';
+  return Boolean(metadata.title);
+}
+
 async function lookupIsbn() {
   const isbn = normalizeIsbn($('#isbn').value);
   if (!isbn) {
     elements.lookupStatus.textContent = 'ISBN 10자리 또는 13자리를 확인해주세요.';
-    return;
+    return false;
   }
   $('#isbn').value = isbn;
-  elements.lookupStatus.textContent = '책 정보를 찾는 중…';
+  elements.lookupStatus.textContent = '국내외 도서 정보를 찾는 중…';
   try {
-    const response = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${encodeURIComponent(isbn)}&jscmd=data&format=json`);
-    if (!response.ok) throw new Error('lookup failed');
-    const data = await response.json();
-    const item = data[`ISBN:${isbn}`];
-    if (!item) {
-      elements.lookupStatus.textContent = '자동으로 찾지 못했어요. 제목을 직접 입력해주세요.';
-      return;
-    }
-    $('#title').value = item.title || '';
-    $('#author').value = (item.authors || []).map((author) => author.name).join(', ');
-    $('#publisher').value = (item.publishers || []).map((publisher) => publisher.name).join(', ');
-    draftCoverUrl = item.cover?.medium || item.cover?.small || '';
-    elements.lookupStatus.textContent = '책 정보를 불러왔어요. 내용을 확인해주세요.';
+    const [googleResult, openLibraryResult] = await Promise.allSettled([
+      fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(`isbn:${isbn}`)}&maxResults=5`).then((response) => response.ok ? response.json() : null),
+      fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${encodeURIComponent(isbn)}&jscmd=data&format=json`).then((response) => response.ok ? response.json() : null),
+    ]);
+    const googleMetadata = googleResult.status === 'fulfilled' ? googleBookToMetadata(googleResult.value, isbn) : null;
+    const openItem = openLibraryResult.status === 'fulfilled' ? openLibraryResult.value?.[`ISBN:${isbn}`] : null;
+    const openMetadata = openItem ? {
+      title: openItem.title || '',
+      author: (openItem.authors || []).map((author) => author.name).join(', '),
+      publisher: (openItem.publishers || []).map((publisher) => publisher.name).join(', '),
+      coverUrl: openItem.cover?.medium || openItem.cover?.small || '',
+    } : null;
+    const found = applyBookMetadata(googleMetadata || openMetadata);
+    elements.lookupStatus.textContent = found
+      ? '책 정보를 불러왔어요. 이제 밀리에서 제목으로 확인할 수 있어요.'
+      : '책 정보를 찾지 못했어요. 제목을 직접 입력하면 밀리 검색이 됩니다.';
+    return found;
   } catch {
-    elements.lookupStatus.textContent = '인터넷 연결을 확인하거나 정보를 직접 입력해주세요.';
+    elements.lookupStatus.textContent = '인터넷 연결을 확인하거나 제목을 직접 입력해주세요.';
+    return false;
   }
 }
 
-function searchMillie() {
-  const query = $('#title').value.trim() || $('#isbn').value.trim();
-  if (!query) {
-    showToast('먼저 책 제목이나 ISBN을 입력해주세요.');
+async function searchMillie() {
+  const isbn = normalizeIsbn($('#isbn').value);
+  const pendingTab = window.open('about:blank', '_blank');
+  if (!$('#title').value.trim() && isbn) await lookupIsbn();
+  const url = millieSearchUrl({
+    title: $('#title').value,
+    author: $('#author').value,
+    isbn,
+  });
+  if (!url) {
+    pendingTab?.close();
+    showToast('먼저 ISBN이나 책 제목을 입력해주세요.');
     return;
   }
-  const url = `https://www.google.com/search?q=${encodeURIComponent(`site:millie.co.kr ${query}`)}`;
-  window.open(url, '_blank', 'noopener,noreferrer');
-  showToast('검색 결과를 확인한 뒤 밀리 상태를 선택하세요.');
+  if (pendingTab) pendingTab.location.href = url;
+  else window.location.href = url;
+  showToast('밀리 공식 검색을 열었어요. 로그인이 필요할 수 있어요.');
 }
 
 function stopScanner() {
@@ -284,15 +313,82 @@ function stopScanner() {
   scannerTimer = null;
   scannerStream?.getTracks().forEach((track) => track.stop());
   scannerStream = null;
+  scannerTrack = null;
+  torchOn = false;
   elements.scannerVideo.srcObject = null;
+  $('#toggle-torch').hidden = true;
+  $('#zoom-control').hidden = true;
   if (elements.scannerDialog.open) elements.scannerDialog.close();
 }
 
-async function scanFrame(detector, deadline) {
-  if (!scannerStream || Date.now() > deadline) {
-    elements.scannerStatus.textContent = '시간이 초과됐어요. ISBN을 직접 입력해도 됩니다.';
-    return;
+function trackCapabilities() {
+  try {
+    return scannerTrack?.getCapabilities?.() || {};
+  } catch {
+    return {};
   }
+}
+
+async function applyTrackAdvanced(advanced) {
+  if (!scannerTrack || !Object.keys(advanced).length) return;
+  try {
+    await scannerTrack.applyConstraints({ advanced: [advanced] });
+  } catch {
+    // 일부 모바일 브라우저는 기능 지원을 잘못 보고하므로 실패한 옵션만 건너뜁니다.
+  }
+}
+
+async function configureCameraTrack() {
+  const capabilities = trackCapabilities();
+  const focusModes = Array.isArray(capabilities.focusMode) ? capabilities.focusMode : [];
+  const advanced = {};
+  if (focusModes.includes('continuous')) advanced.focusMode = 'continuous';
+
+  const zoomInput = $('#camera-zoom');
+  if (capabilities.zoom) {
+    const min = Number(capabilities.zoom.min ?? 1);
+    const max = Number(capabilities.zoom.max ?? min);
+    const step = Number(capabilities.zoom.step ?? 0.1);
+    const initial = Math.min(max, Math.max(min, 1.5));
+    zoomInput.min = String(min);
+    zoomInput.max = String(max);
+    zoomInput.step = String(step || 0.1);
+    zoomInput.value = String(initial);
+    $('#zoom-control').hidden = false;
+    advanced.zoom = initial;
+  } else {
+    $('#zoom-control').hidden = true;
+  }
+
+  $('#toggle-torch').hidden = !capabilities.torch;
+  await applyTrackAdvanced(advanced);
+  const settings = scannerTrack?.getSettings?.() || {};
+  const resolution = settings.width && settings.height ? ` · ${settings.width}×${settings.height}` : '';
+  elements.scannerStatus.textContent = `자동 초점 적용${resolution}. 15~25cm 떨어져 바코드를 네모 안에 맞춰주세요.`;
+}
+
+async function refocusCamera() {
+  const focusModes = Array.isArray(trackCapabilities().focusMode) ? trackCapabilities().focusMode : [];
+  if (focusModes.includes('single-shot')) {
+    await applyTrackAdvanced({ focusMode: 'single-shot' });
+    window.setTimeout(() => applyTrackAdvanced(focusModes.includes('continuous') ? { focusMode: 'continuous' } : {}), 700);
+    elements.scannerStatus.textContent = '초점을 다시 맞췄어요. 휴대폰을 잠깐 멈춰주세요.';
+  } else if (focusModes.includes('continuous')) {
+    await applyTrackAdvanced({ focusMode: 'continuous' });
+    elements.scannerStatus.textContent = '연속 자동 초점을 다시 적용했어요.';
+  } else {
+    elements.scannerStatus.textContent = '이 기기는 수동 초점을 지원하지 않아요. 15~25cm 떨어져 촬영해주세요.';
+  }
+}
+
+async function toggleTorch() {
+  torchOn = !torchOn;
+  await applyTrackAdvanced({ torch: torchOn });
+  $('#toggle-torch').textContent = torchOn ? '조명 끄기' : '조명 켜기';
+}
+
+async function scanFrame(detector) {
+  if (!scannerStream) return;
   try {
     const results = await detector.detect(elements.scannerVideo);
     const isbnResult = results.find((result) => normalizeIsbn(result.rawValue));
@@ -304,29 +400,36 @@ async function scanFrame(detector, deadline) {
       return;
     }
   } catch {
-    elements.scannerStatus.textContent = '바코드를 읽는 중입니다. 카메라를 고정해주세요.';
+    elements.scannerStatus.textContent = '초점을 맞추는 중이에요. 바코드를 네모 안에 크게 맞춰주세요.';
   }
-  scannerTimer = window.setTimeout(() => scanFrame(detector, deadline), 450);
+  scannerTimer = window.setTimeout(() => scanFrame(detector), 180);
 }
 
 async function startScanner() {
   if (!('BarcodeDetector' in window) || !navigator.mediaDevices?.getUserMedia) {
-    showToast('이 브라우저는 바코드 촬영을 지원하지 않아요. ISBN을 직접 입력해주세요.');
+    showToast('이 브라우저는 자동 인식을 지원하지 않아요. Chrome에서 열거나 ISBN을 입력해주세요.');
     return;
   }
   try {
     const formats = await BarcodeDetector.getSupportedFormats();
-    const desired = ['ean_13', 'ean_8'].filter((format) => formats.includes(format));
+    const desired = ['ean_13', 'ean_8', 'upc_a', 'upc_e'].filter((format) => formats.includes(format));
     const detector = new BarcodeDetector({ formats: desired.length ? desired : formats });
-    scannerStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
-    elements.scannerVideo.srcObject = scannerStream;
     elements.scannerDialog.showModal();
-    elements.scannerStatus.textContent = '책 뒤표지 바코드를 화면 중앙에 맞춰주세요.';
+    elements.scannerStatus.textContent = '고해상도 후면 카메라를 준비하는 중…';
+    try {
+      scannerStream = await navigator.mediaDevices.getUserMedia(buildCameraConstraints());
+    } catch (error) {
+      if (error?.name !== 'OverconstrainedError') throw error;
+      scannerStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
+    }
+    scannerTrack = scannerStream.getVideoTracks()[0] || null;
+    elements.scannerVideo.srcObject = scannerStream;
     await elements.scannerVideo.play();
-    scanFrame(detector, Date.now() + 30000);
-  } catch {
+    await configureCameraTrack();
+    scanFrame(detector);
+  } catch (error) {
     stopScanner();
-    showToast('카메라 권한을 확인해주세요.');
+    showToast(error?.name === 'NotAllowedError' ? '카메라 권한을 허용해주세요.' : '카메라를 열지 못했어요. Chrome에서 다시 시도해주세요.');
   }
 }
 
@@ -375,6 +478,10 @@ $('#lookup-isbn').addEventListener('click', lookupIsbn);
 $('#scan-isbn').addEventListener('click', startScanner);
 $('#search-millie').addEventListener('click', searchMillie);
 $('#close-scanner').addEventListener('click', stopScanner);
+$('#refocus-camera').addEventListener('click', refocusCamera);
+$('#toggle-torch').addEventListener('click', toggleTorch);
+$('#camera-zoom').addEventListener('input', (event) => applyTrackAdvanced({ zoom: Number(event.target.value) }));
+elements.scannerVideo.addEventListener('click', refocusCamera);
 elements.scannerDialog.addEventListener('cancel', (event) => { event.preventDefault(); stopScanner(); });
 $('#add-book-top').addEventListener('click', openForm);
 $('#close-form').addEventListener('click', () => { elements.panel.hidden = true; });

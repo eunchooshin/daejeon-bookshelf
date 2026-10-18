@@ -6,7 +6,7 @@ const root = new URL('../', import.meta.url);
 
 test('앱 화면은 등록 폼, 검색, 책장, 데이터 백업 기능을 제공한다', async () => {
   const html = await readFile(new URL('index.html', root), 'utf8');
-  for (const id of ['book-form', 'isbn', 'scan-isbn', 'lookup-isbn', 'search', 'disposition-filter', 'bookshelf', 'export-csv', 'drive-backup', 'drive-restore', 'import-json', 'next-two-years']) {
+  for (const id of ['book-form', 'isbn', 'scan-isbn', 'lookup-isbn', 'search-millie', 'search', 'disposition-filter', 'bookshelf', 'export-csv', 'drive-backup', 'drive-restore', 'import-json', 'next-two-years', 'refocus-camera', 'toggle-torch', 'camera-zoom']) {
     assert.match(html, new RegExp(`id=["']${id}["']`));
   }
 });

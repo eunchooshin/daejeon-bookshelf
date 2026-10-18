@@ -1,5 +1,5 @@
-const CACHE = 'book-galpi-v4';
-const ASSETS = ['./', './index.html', './styles.css', './src/app.js', './src/domain.js', './manifest.webmanifest'];
+const CACHE = 'book-galpi-v5';
+const ASSETS = ['./', './index.html', './styles.css', './src/app.js', './src/domain.js', './src/integrations.js', './manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
