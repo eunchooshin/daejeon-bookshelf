@@ -4,6 +4,7 @@ import {
   buildCameraConstraints,
   googleBookToMetadata,
   googleBooksJsonpUrl,
+  localBookMetadata,
   millieSearchUrl,
   openLibraryJsonpUrl,
   pickBarcodeDetector,
@@ -51,6 +52,15 @@ test('Google Books ISBN 결과를 책 메타데이터로 변환한다', () => {
     author: '홍길동',
     publisher: '테스트 출판사',
     coverUrl: 'https://books.google.com/cover.jpg',
+  });
+});
+
+test('외부 도서 DB에 없는 검수 완료 국내 ISBN은 내장 목록에서 찾는다', () => {
+  assert.deepEqual(localBookMetadata('9791188102051'), {
+    title: '더 시스템',
+    author: '스콧 애덤스',
+    publisher: '베리북',
+    coverUrl: '',
   });
 });
 

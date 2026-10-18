@@ -26,6 +26,19 @@ export function openLibraryJsonpUrl(isbn, callbackName) {
   return `https://openlibrary.org/api/books?bibkeys=${bibkey}&jscmd=data&format=json&callback=${encodeURIComponent(callbackName)}`;
 }
 
+const VERIFIED_KOREAN_BOOKS = {
+  '9791188102051': {
+    title: '더 시스템',
+    author: '스콧 애덤스',
+    publisher: '베리북',
+    coverUrl: '',
+  },
+};
+
+export function localBookMetadata(isbn) {
+  return VERIFIED_KOREAN_BOOKS[String(isbn).replace(/[^0-9X]/gi, '').toUpperCase()] || null;
+}
+
 export function googleBookToMetadata(data, isbn = '') {
   const items = Array.isArray(data?.items) ? data.items : [];
   const clean = String(isbn).replace(/[^0-9X]/gi, '').toUpperCase();

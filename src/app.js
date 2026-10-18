@@ -14,6 +14,7 @@ import {
   buildCameraConstraints,
   googleBookToMetadata,
   googleBooksJsonpUrl,
+  localBookMetadata,
   millieSearchUrl,
   openLibraryJsonpUrl,
   pickBarcodeDetector,
@@ -289,6 +290,12 @@ async function lookupIsbn() {
     return false;
   }
   $('#isbn').value = isbn;
+  const verifiedMetadata = localBookMetadata(isbn);
+  if (verifiedMetadata) {
+    applyBookMetadata(verifiedMetadata);
+    elements.lookupStatus.textContent = '검수 완료된 국내 도서 정보를 불러왔어요.';
+    return true;
+  }
   elements.lookupStatus.textContent = '국내외 도서 정보를 찾는 중…';
   try {
     const [googleResult, openLibraryResult] = await Promise.allSettled([
