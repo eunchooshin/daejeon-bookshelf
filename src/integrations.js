@@ -12,6 +12,20 @@ export function buildCameraConstraints() {
   };
 }
 
+export function pickBarcodeDetector(nativeDetector, polyfillDetector) {
+  return nativeDetector || polyfillDetector || null;
+}
+
+export function googleBooksJsonpUrl(isbn, callbackName) {
+  const query = encodeURIComponent(`isbn:${String(isbn).trim()}`);
+  return `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=5&callback=${encodeURIComponent(callbackName)}`;
+}
+
+export function openLibraryJsonpUrl(isbn, callbackName) {
+  const bibkey = encodeURIComponent(`ISBN:${String(isbn).trim()}`);
+  return `https://openlibrary.org/api/books?bibkeys=${bibkey}&jscmd=data&format=json&callback=${encodeURIComponent(callbackName)}`;
+}
+
 export function googleBookToMetadata(data, isbn = '') {
   const items = Array.isArray(data?.items) ? data.items : [];
   const clean = String(isbn).replace(/[^0-9X]/gi, '').toUpperCase();

@@ -3,7 +3,10 @@ import assert from 'node:assert/strict';
 import {
   buildCameraConstraints,
   googleBookToMetadata,
+  googleBooksJsonpUrl,
   millieSearchUrl,
+  openLibraryJsonpUrl,
+  pickBarcodeDetector,
 } from '../src/integrations.js';
 
 test('후면 카메라를 고해상도 연속 초점으로 요청한다', () => {
@@ -12,6 +15,25 @@ test('후면 카메라를 고해상도 연속 초점으로 요청한다', () => 
   assert.equal(constraints.video.width.ideal, 1920);
   assert.equal(constraints.video.height.ideal, 1080);
   assert.match(JSON.stringify(constraints.video), /continuous/);
+});
+
+test('기본 바코드 API가 없는 브라우저에서는 내장 폴리필을 사용한다', () => {
+  class PolyfillDetector {}
+  assert.equal(pickBarcodeDetector(undefined, PolyfillDetector), PolyfillDetector);
+});
+
+test('Google Books JSONP 주소는 CORS 없이 ISBN을 조회할 수 있게 만든다', () => {
+  assert.equal(
+    googleBooksJsonpUrl('9788936434120', 'bookCallback'),
+    'https://www.googleapis.com/books/v1/volumes?q=isbn%3A9788936434120&maxResults=5&callback=bookCallback',
+  );
+});
+
+test('Open Library JSONP 주소도 CORS 없이 ISBN을 조회할 수 있게 만든다', () => {
+  assert.equal(
+    openLibraryJsonpUrl('9788936434120', 'bookCallback'),
+    'https://openlibrary.org/api/books?bibkeys=ISBN%3A9788936434120&jscmd=data&format=json&callback=bookCallback',
+  );
 });
 
 test('Google Books ISBN 결과를 책 메타데이터로 변환한다', () => {

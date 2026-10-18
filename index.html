@@ -41,7 +41,8 @@
             <label for="isbn">ISBN</label>
             <div class="input-actions">
               <input id="isbn" name="isbn" inputmode="numeric" placeholder="978…" maxlength="17">
-              <button id="scan-isbn" class="button ghost" type="button">카메라</button>
+              <button id="scan-isbn" class="button ghost" type="button">실시간 카메라</button>
+              <label id="scan-photo" class="button ghost file-button">사진 촬영<input id="barcode-photo" type="file" accept="image/*" capture="environment"></label>
               <button id="lookup-isbn" class="button ghost" type="button">책 찾기</button>
             </div>
             <small id="lookup-status">바코드를 촬영하거나 ISBN을 입력하세요.</small>
@@ -144,6 +145,12 @@
   </dialog>
 
   <div id="toast" role="status" aria-live="polite"></div>
+  <script src="vendor/zbar-wasm.js"></script>
+  <script src="vendor/barcode-detector-polyfill.js"></script>
+  <script>
+    window.BookBarcodeDetectorPolyfill = barcodeDetectorPolyfill.BarcodeDetectorPolyfill;
+    window.BookBarcodeDetector = window.BarcodeDetector || window.BookBarcodeDetectorPolyfill;
+  </script>
   <script type="module" src="src/app.js"></script>
 </body>
 </html>

@@ -13,7 +13,10 @@ import {
 import {
   buildCameraConstraints,
   googleBookToMetadata,
+  googleBooksJsonpUrl,
   millieSearchUrl,
+  openLibraryJsonpUrl,
+  pickBarcodeDetector,
 } from './integrations.js';
 
 const STORAGE_KEY = 'daejeon-bookshelf.v1';
@@ -248,6 +251,28 @@ function formBook() {
   return createBook(input);
 }
 
+function barcodeDetectorClass() {
+  return pickBarcodeDetector(window.BarcodeDetector, window.BookBarcodeDetector);
+}
+
+function lookupJsonp(urlBuilder, isbn, timeoutMs = 8000) {
+  return new Promise((resolve) => {
+    const callbackName = `__bookGalpi_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const script = document.createElement('script');
+    const finish = (data = null) => {
+      window.clearTimeout(timer);
+      script.remove();
+      delete window[callbackName];
+      resolve(data);
+    };
+    const timer = window.setTimeout(() => finish(), timeoutMs);
+    window[callbackName] = (data) => finish(data);
+    script.onerror = () => finish();
+    script.src = urlBuilder(isbn, callbackName);
+    document.head.append(script);
+  });
+}
+
 function applyBookMetadata(metadata) {
   if (!metadata) return false;
   $('#title').value = metadata.title || '';
@@ -270,7 +295,7 @@ async function lookupIsbn() {
       fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(`isbn:${isbn}`)}&maxResults=5`).then((response) => response.ok ? response.json() : null),
       fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${encodeURIComponent(isbn)}&jscmd=data&format=json`).then((response) => response.ok ? response.json() : null),
     ]);
-    const googleMetadata = googleResult.status === 'fulfilled' ? googleBookToMetadata(googleResult.value, isbn) : null;
+    let googleMetadata = googleResult.status === 'fulfilled' ? googleBookToMetadata(googleResult.value, isbn) : null;
     const openItem = openLibraryResult.status === 'fulfilled' ? openLibraryResult.value?.[`ISBN:${isbn}`] : null;
     const openMetadata = openItem ? {
       title: openItem.title || '',
@@ -278,7 +303,24 @@ async function lookupIsbn() {
       publisher: (openItem.publishers || []).map((publisher) => publisher.name).join(', '),
       coverUrl: openItem.cover?.medium || openItem.cover?.small || '',
     } : null;
-    const found = applyBookMetadata(googleMetadata || openMetadata);
+    let jsonpMetadata = null;
+    if (!googleMetadata && !openMetadata) {
+      const [googleJsonp, openJsonp] = await Promise.all([
+        lookupJsonp(googleBooksJsonpUrl, isbn),
+        lookupJsonp(openLibraryJsonpUrl, isbn),
+      ]);
+      googleMetadata = googleBookToMetadata(googleJsonp, isbn);
+      const jsonpItem = openJsonp?.[`ISBN:${isbn}`];
+      if (jsonpItem) {
+        jsonpMetadata = {
+          title: jsonpItem.title || '',
+          author: (jsonpItem.authors || []).map((author) => author.name).join(', '),
+          publisher: (jsonpItem.publishers || []).map((publisher) => publisher.name).join(', '),
+          coverUrl: jsonpItem.cover?.medium || jsonpItem.cover?.small || '',
+        };
+      }
+    }
+    const found = applyBookMetadata(googleMetadata || openMetadata || jsonpMetadata);
     elements.lookupStatus.textContent = found
       ? '책 정보를 불러왔어요. 이제 밀리에서 제목으로 확인할 수 있어요.'
       : '책 정보를 찾지 못했어요. 제목을 직접 입력하면 밀리 검색이 됩니다.';
@@ -406,14 +448,15 @@ async function scanFrame(detector) {
 }
 
 async function startScanner() {
-  if (!('BarcodeDetector' in window) || !navigator.mediaDevices?.getUserMedia) {
-    showToast('이 브라우저는 자동 인식을 지원하지 않아요. Chrome에서 열거나 ISBN을 입력해주세요.');
+  const Detector = barcodeDetectorClass();
+  if (!Detector || !navigator.mediaDevices?.getUserMedia) {
+    showToast('실시간 카메라를 열 수 없어요. 바로 옆의 사진 촬영을 이용해주세요.');
     return;
   }
   try {
-    const formats = await BarcodeDetector.getSupportedFormats();
-    const desired = ['ean_13', 'ean_8', 'upc_a', 'upc_e'].filter((format) => formats.includes(format));
-    const detector = new BarcodeDetector({ formats: desired.length ? desired : formats });
+    const formats = await Detector.getSupportedFormats();
+    const desired = ['ean_13', 'ean_8', 'isbn_13', 'isbn_10', 'upc_a', 'upc_e'].filter((format) => formats.includes(format));
+    const detector = new Detector({ formats: desired.length ? desired : formats });
     elements.scannerDialog.showModal();
     elements.scannerStatus.textContent = '고해상도 후면 카메라를 준비하는 중…';
     try {
@@ -430,6 +473,31 @@ async function startScanner() {
   } catch (error) {
     stopScanner();
     showToast(error?.name === 'NotAllowedError' ? '카메라 권한을 허용해주세요.' : '카메라를 열지 못했어요. Chrome에서 다시 시도해주세요.');
+  }
+}
+
+async function scanBarcodePhoto(file) {
+  const Detector = window.BookBarcodeDetectorPolyfill || barcodeDetectorClass();
+  if (!Detector) {
+    showToast('사진 바코드 판독기를 불러오지 못했어요.');
+    return;
+  }
+  elements.lookupStatus.textContent = '사진에서 바코드를 읽는 중…';
+  try {
+    const formats = await Detector.getSupportedFormats();
+    const desired = ['ean_13', 'ean_8', 'isbn_13', 'isbn_10', 'upc_a', 'upc_e'].filter((format) => formats.includes(format));
+    const detector = new Detector({ formats: desired.length ? desired : formats });
+    const results = await detector.detect(file);
+    const found = results.find((result) => normalizeIsbn(result.rawValue));
+    if (!found) {
+      elements.lookupStatus.textContent = '사진에서 ISBN을 찾지 못했어요. 바코드만 크게 다시 촬영해주세요.';
+      return;
+    }
+    $('#isbn').value = normalizeIsbn(found.rawValue);
+    await lookupIsbn();
+    showToast('사진에서 ISBN을 인식했어요.');
+  } catch {
+    elements.lookupStatus.textContent = '사진을 읽지 못했어요. 바코드를 밝고 선명하게 다시 촬영해주세요.';
   }
 }
 
@@ -476,6 +544,11 @@ elements.form.addEventListener('submit', (event) => {
 
 $('#lookup-isbn').addEventListener('click', lookupIsbn);
 $('#scan-isbn').addEventListener('click', startScanner);
+$('#barcode-photo').addEventListener('change', async (event) => {
+  const [file] = event.target.files;
+  if (file) await scanBarcodePhoto(file);
+  event.target.value = '';
+});
 $('#search-millie').addEventListener('click', searchMillie);
 $('#close-scanner').addEventListener('click', stopScanner);
 $('#refocus-camera').addEventListener('click', refocusCamera);
