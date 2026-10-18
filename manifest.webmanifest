@@ -1,0 +1,11 @@
+{
+  "name": "책갈피 — 대전 책 정리",
+  "short_name": "책갈피",
+  "description": "개인용 책장과 보관·스캔·기증 결정 도우미",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f0e7",
+  "theme_color": "#345243",
+  "lang": "ko-KR"
+}

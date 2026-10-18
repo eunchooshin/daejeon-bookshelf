@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#345243">
+  <meta name="description" content="대전 집 책 정리를 위한 개인용 책장과 보관·스캔·기증 결정 도우미">
+  <title>책갈피 — 대전 책 정리</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="책갈피 홈">
+      <span class="brand-mark" aria-hidden="true">책</span>
+      <span><strong>책갈피</strong><small>대전 책 정리</small></span>
+    </a>
+    <button id="add-book-top" class="button primary" type="button">책 등록</button>
+  </header>
+
+  <main id="top">
+    <section class="intro" aria-labelledby="intro-title">
+      <div>
+        <p class="eyebrow">PRIVATE BOOK ORGANIZER</p>
+        <h1 id="intro-title">버릴 책보다,<br><em>남길 이유</em>부터 찾기.</h1>
+        <p>ISBN으로 책을 등록하고 밀리 보유 여부, 필기, 희귀성, 활용도를 확인해 보관·스캔·판매·기증을 결정하세요.</p>
+      </div>
+      <div id="summary" class="summary" aria-label="책장 요약"></div>
+    </section>
+
+    <section class="workspace" aria-label="책 정리 작업공간">
+      <aside class="panel form-panel" id="form-panel">
+        <div class="section-heading">
+          <div><span>01</span><h2 id="form-title">새 책 등록</h2></div>
+          <button id="close-form" class="icon-button" type="button" aria-label="등록창 닫기">×</button>
+        </div>
+
+        <form id="book-form" autocomplete="off">
+          <input id="book-id" name="id" type="hidden">
+          <div class="field isbn-field">
+            <label for="isbn">ISBN</label>
+            <div class="input-actions">
+              <input id="isbn" name="isbn" inputmode="numeric" placeholder="978…" maxlength="17">
+              <button id="scan-isbn" class="button ghost" type="button">카메라</button>
+              <button id="lookup-isbn" class="button ghost" type="button">책 찾기</button>
+            </div>
+            <small id="lookup-status">바코드를 촬영하거나 ISBN을 입력하세요.</small>
+          </div>
+
+          <div class="field">
+            <label for="title">책 제목 *</label>
+            <input id="title" name="title" required placeholder="책 제목">
+          </div>
+          <div class="two-columns">
+            <div class="field"><label for="author">저자</label><input id="author" name="author" placeholder="저자"></div>
+            <div class="field"><label for="publisher">출판사</label><input id="publisher" name="publisher" placeholder="출판사"></div>
+          </div>
+
+          <fieldset>
+            <legend>이 책을 남길 이유</legend>
+            <div class="checks">
+              <label><input type="checkbox" name="favorite"> 애장본</label>
+              <label><input type="checkbox" name="annotated"> 필기 있음</label>
+              <label><input type="checkbox" name="rare"> 희귀·절판</label>
+              <label><input type="checkbox" name="workReference"> 업무 참고</label>
+              <label><input type="checkbox" name="resaleValue"> 중고 가치</label>
+            </div>
+          </fieldset>
+
+          <div class="two-columns">
+            <div class="field">
+              <label for="reread">다시 읽을 가능성</label>
+              <select id="reread" name="reread"><option value="high">높음</option><option value="medium" selected>보통</option><option value="low">낮음</option></select>
+            </div>
+            <div class="field">
+              <label for="condition">책 상태</label>
+              <select id="condition" name="condition"><option value="good">양호</option><option value="worn">훼손·오염</option></select>
+            </div>
+          </div>
+
+          <div class="millie-row">
+            <div class="field">
+              <label for="millie-status">밀리의 서재</label>
+              <select id="millie-status" name="millieStatus">
+                <option value="unchecked">확인 전</option><option value="full">완전판 있음</option><option value="partial">일부·요약만</option><option value="not_found">없음</option>
+              </select>
+            </div>
+            <button id="search-millie" class="button text-button" type="button">공식 검색으로 확인 ↗</button>
+          </div>
+
+          <div class="two-columns">
+            <div class="field"><label for="disposition">최종 결정</label><select id="disposition" name="disposition"><option value="auto">자동 추천</option><option value="keep">실물 보관</option><option value="scan">자가 스캔</option><option value="millie">밀리로 대체</option><option value="sell">중고 판매</option><option value="donate">기증</option><option value="recycle">폐기</option></select></div>
+            <div class="field"><label for="box">박스·위치</label><input id="box" name="box" placeholder="예: 박스 A-3"></div>
+          </div>
+          <div class="field"><label for="notes">메모</label><textarea id="notes" name="notes" rows="3" placeholder="필기 위치, 다시 볼 이유 등"></textarea></div>
+
+          <div class="form-actions">
+            <button id="cancel-edit" class="button ghost" type="button">초기화</button>
+            <button class="button primary" type="submit">내 책장에 저장</button>
+          </div>
+        </form>
+      </aside>
+
+      <section class="shelf-area" aria-labelledby="shelf-title">
+        <div class="section-heading shelf-heading">
+          <div><span>02</span><h2 id="shelf-title">내 책장</h2></div>
+          <div class="data-actions">
+            <button id="export-csv" class="button ghost" type="button">CSV</button>
+            <button id="export-json" class="button ghost" type="button">백업</button>
+            <label class="button ghost file-button">복원<input id="import-json" type="file" accept="application/json"></label>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <label class="search-box"><span class="sr-only">책 검색</span><input id="search" type="search" placeholder="제목, 저자, ISBN, 박스 검색"></label>
+          <select id="disposition-filter" aria-label="정리 결정 필터">
+            <option value="all">모든 결정</option><option value="keep">실물 보관</option><option value="scan">자가 스캔</option><option value="millie">밀리로 대체</option><option value="sell">중고 판매</option><option value="donate">기증</option><option value="recycle">폐기</option>
+          </select>
+        </div>
+
+        <div id="bookshelf" class="bookshelf" aria-live="polite"></div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="scanner-dialog">
+    <div class="scanner-head"><strong>ISBN 바코드 촬영</strong><button id="close-scanner" class="icon-button" type="button" aria-label="카메라 닫기">×</button></div>
+    <video id="scanner-video" playsinline muted></video>
+    <p id="scanner-status">책 뒤표지 바코드를 화면 중앙에 맞춰주세요.</p>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
