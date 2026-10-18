@@ -9,28 +9,47 @@ import {
   removeBook,
   filterBooks,
   isOutbound,
+  assignDeferredBox,
+  buildBackup,
+  parseBackup,
 } from '../src/domain.js';
 
-test('애장본이나 희귀본은 실물 보관을 권한다', () => {
-  assert.equal(recommendDisposition({ favorite: true }), 'keep');
+test('1~2년 안에 확실히 읽거나 자주 참고할 책은 서울행을 권한다', () => {
+  assert.equal(recommendDisposition({ nextTwoYears: 'yes' }), 'seoul');
+  assert.equal(recommendDisposition({ frequentReference: true }), 'seoul');
+});
+
+test('절판·전문자료·메모가 있는 대체 불가 책은 보관을 권한다', () => {
   assert.equal(recommendDisposition({ rare: true }), 'keep');
+  assert.equal(recommendDisposition({ professional: true }), 'keep');
+  assert.equal(recommendDisposition({ annotated: true }), 'keep');
 });
 
-test('업무 참고서는 보존용 스캔을 권한다', () => {
-  assert.equal(recommendDisposition({ workReference: true }), 'scan');
+test('서울 집에 같은 책이 있으면 중복 정리를 권한다', () => {
+  assert.equal(recommendDisposition({ duplicateInSeoul: true, nextTwoYears: 'yes' }), 'duplicate');
 });
 
-test('밀리 완전판이 있고 다시 읽을 가능성이 낮으면 밀리 대체를 권한다', () => {
-  assert.equal(recommendDisposition({ millieStatus: 'full', reread: 'low' }), 'millie');
+test('쉽게 다시 구할 수 있고 읽을 시점이 불분명하면 판매 또는 기부를 권한다', () => {
+  assert.equal(recommendDisposition({ easyToReplace: true, nextTwoYears: 'unsure', resaleValue: true }), 'sell');
+  assert.equal(recommendDisposition({ easyToReplace: true, nextTwoYears: 'no', resaleValue: false }), 'donate');
 });
 
-test('양호하고 중고가치가 있으면 판매, 없으면 기증을 권한다', () => {
-  assert.equal(recommendDisposition({ condition: 'good', resaleValue: true }), 'sell');
-  assert.equal(recommendDisposition({ condition: 'good', resaleValue: false }), 'donate');
+test('이미 읽은 참고용 책은 온라인 나의 읽은 책으로 보낸다', () => {
+  assert.equal(recommendDisposition({ alreadyRead: true, referenceBook: true }), 'read_archive');
 });
 
-test('상태가 나쁘면 폐기를 권한다', () => {
-  assert.equal(recommendDisposition({ condition: 'worn' }), 'recycle');
+test('판단 근거가 부족하면 보류 상자로 보내고 상자는 하나로 고정한다', () => {
+  assert.equal(recommendDisposition({ nextTwoYears: 'unsure' }), 'defer');
+  assert.equal(assignDeferredBox({ disposition: 'defer', box: '' }).box, '보류 상자 1');
+  assert.equal(assignDeferredBox({ disposition: 'defer', box: '보류 상자 2' }).box, '보류 상자 1');
+});
+
+test('밀리 완전판이고 1~2년 안에 읽지 않을 책은 밀리 대체를 권한다', () => {
+  assert.equal(recommendDisposition({ millieStatus: 'full', nextTwoYears: 'no' }), 'millie');
+});
+
+test('상태가 나쁜 책은 폐기를 권한다', () => {
+  assert.equal(recommendDisposition({ condition: 'worn', nextTwoYears: 'no' }), 'recycle');
 });
 
 test('ISBN에서 하이픈과 공백을 제거하고 유효 길이만 허용한다', () => {
@@ -43,13 +62,15 @@ test('CSV 내보내기는 쉼표와 따옴표를 안전하게 이스케이프한
   const csv = booksToCsv([{ title: '책, 하나', author: '김"추츄', disposition: 'keep' }]);
   assert.match(csv, /"책, 하나"/);
   assert.match(csv, /"김""추츄"/);
-  assert.match(csv, /실물 보관/);
+  assert.match(csv, /대체 불가 보관/);
 });
 
-test('새 책은 기본값과 추천 결정을 포함한다', () => {
-  const book = createBook({ id: 'fixed', title: '정리할 책', workReference: true });
+test('새 책은 새 기준의 기본값과 추천 결정을 포함한다', () => {
+  const book = createBook({ id: 'fixed', title: '정리할 책', nextTwoYears: 'yes' });
   assert.equal(book.id, 'fixed');
-  assert.equal(book.disposition, 'scan');
+  assert.equal(book.disposition, 'seoul');
+  assert.equal(book.nextTwoYears, 'yes');
+  assert.equal(createBook({ id: 'default', title: '미정 책' }).nextTwoYears, 'unsure');
   assert.equal(book.millieStatus, 'unchecked');
 });
 
@@ -74,9 +95,24 @@ test('제목 검색과 정리 결정 필터를 함께 적용한다', () => {
   assert.equal(filterBooks(books, { query: '추츄', disposition: 'all' }).length, 1);
 });
 
-test('자가 스캔을 포함해 실물 보관 외 결정은 집에서 내보낼 책으로 센다', () => {
-  for (const disposition of ['scan', 'millie', 'sell', 'donate', 'recycle']) {
+test('서울행과 온라인 읽은 책을 포함해 대전 집에서 나갈 책을 센다', () => {
+  for (const disposition of ['seoul', 'read_archive', 'duplicate', 'scan', 'millie', 'sell', 'donate', 'recycle']) {
     assert.equal(isOutbound({ disposition }), true);
   }
   assert.equal(isOutbound({ disposition: 'keep' }), false);
+  assert.equal(isOutbound({ disposition: 'defer' }), false);
+});
+
+test('Google Drive 백업은 버전 정보와 책 목록을 담고 다시 복원된다', () => {
+  const source = [createBook({ id: 'drive-1', title: '드라이브 책', nextTwoYears: 'yes' })];
+  const backup = buildBackup(source, '2026-10-18T00:00:00.000Z');
+  assert.equal(backup.app, '책갈피');
+  assert.equal(backup.version, 2);
+  assert.equal(backup.exportedAt, '2026-10-18T00:00:00.000Z');
+  assert.equal(parseBackup(JSON.stringify(backup))[0].title, '드라이브 책');
+});
+
+test('이전 배열 백업도 복원하고 잘못된 백업은 거부한다', () => {
+  assert.equal(parseBackup(JSON.stringify([{ id: 'old', title: '옛 백업' }]))[0].title, '옛 백업');
+  assert.throws(() => parseBackup('{"wrong":true}'), /올바른/);
 });

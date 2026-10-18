@@ -1,10 +1,12 @@
 import {
+  buildBackup,
   booksToCsv,
   createBook,
   dispositionLabels,
   filterBooks,
   isOutbound,
   normalizeIsbn,
+  parseBackup,
   removeBook,
   upsertBook,
 } from './domain.js';
@@ -36,7 +38,7 @@ let scannerTimer = null;
 function loadBooks() {
   try {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed) ? parsed.map((book) => createBook(book)) : [];
   } catch {
     return [];
   }
@@ -80,11 +82,11 @@ function summaryItem(label, value) {
 }
 
 function renderSummary() {
-  const actionCount = books.filter(isOutbound).length;
   elements.summary.replaceChildren(
     summaryItem('내 책장', books.length),
-    summaryItem('실물 보관', books.filter((book) => book.disposition === 'keep').length),
-    summaryItem('집에서 내보낼 책', actionCount),
+    summaryItem('서울행', books.filter((book) => book.disposition === 'seoul').length),
+    summaryItem('온라인 읽은 책', books.filter((book) => book.disposition === 'read_archive').length),
+    summaryItem('대전에서 나갈 책', books.filter(isOutbound).length),
   );
 }
 
@@ -202,7 +204,7 @@ function openForm() {
 function resetForm() {
   elements.form.reset();
   $('#book-id').value = '';
-  $('#reread').value = 'medium';
+  $('#next-two-years').value = 'unsure';
   $('#condition').value = 'good';
   $('#millie-status').value = 'unchecked';
   $('#disposition').value = 'auto';
@@ -228,7 +230,7 @@ function editBook(book) {
 function formBook() {
   const data = new FormData(elements.form);
   const input = Object.fromEntries(data.entries());
-  for (const key of ['favorite', 'annotated', 'rare', 'workReference', 'resaleValue']) {
+  for (const key of ['favorite', 'annotated', 'rare', 'professional', 'frequentReference', 'alreadyRead', 'referenceBook', 'duplicateInSeoul', 'easyToReplace', 'resaleValue']) {
     input[key] = data.has(key);
   }
   if (input.disposition === 'auto') delete input.disposition;
@@ -330,15 +332,33 @@ async function startScanner() {
 
 async function importBackup(file) {
   try {
-    const parsed = JSON.parse(await file.text());
-    if (!Array.isArray(parsed) || parsed.some((book) => !book || typeof book.title !== 'string')) throw new Error('invalid');
-    books = parsed.map((book) => createBook(book));
+    books = parseBackup(await file.text()).map((book) => createBook(book));
     persist();
     render();
     showToast(`${books.length}권을 복원했어요.`);
   } catch {
     showToast('올바른 책갈피 백업 파일이 아니에요.');
   }
+}
+
+async function backupToDrive() {
+  const content = JSON.stringify(buildBackup(books), null, 2);
+  const file = new File([content], '책갈피-내책장-백업.json', { type: 'application/json' });
+  if (navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: '책갈피 내 책장 백업',
+        text: '공유 대상에서 Google Drive를 선택해 저장하세요.',
+      });
+      showToast('Google Drive 공유를 완료했어요.');
+      return;
+    } catch (error) {
+      if (error?.name === 'AbortError') return;
+    }
+  }
+  download(file.name, content, 'application/json');
+  showToast('백업 파일을 내려받았어요. Google Drive에 업로드해주세요.');
 }
 
 elements.form.addEventListener('submit', (event) => {
@@ -362,7 +382,7 @@ $('#cancel-edit').addEventListener('click', resetForm);
 elements.search.addEventListener('input', render);
 elements.filter.addEventListener('change', render);
 $('#export-csv').addEventListener('click', () => download('대전-책장.csv', booksToCsv(books), 'text/csv;charset=utf-8'));
-$('#export-json').addEventListener('click', () => download('대전-책장-백업.json', JSON.stringify(books, null, 2), 'application/json'));
+$('#drive-backup').addEventListener('click', backupToDrive);
 $('#import-json').addEventListener('change', (event) => {
   const [file] = event.target.files;
   if (file) importBackup(file);

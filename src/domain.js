@@ -1,9 +1,12 @@
 export function recommendDisposition(book = {}) {
-  if (book.favorite || book.rare || book.annotated) return 'keep';
-  if (book.workReference || book.reread === 'high') return 'scan';
-  if (book.millieStatus === 'full' && book.reread === 'low') return 'millie';
-  if (book.condition === 'good') return book.resaleValue ? 'sell' : 'donate';
-  return 'recycle';
+  if (book.duplicateInSeoul) return 'duplicate';
+  if (book.alreadyRead && book.referenceBook) return 'read_archive';
+  if (book.nextTwoYears === 'yes' || book.frequentReference) return 'seoul';
+  if (book.favorite || book.rare || book.professional || book.annotated) return 'keep';
+  if (book.millieStatus === 'full' && book.nextTwoYears === 'no') return 'millie';
+  if (book.easyToReplace && book.nextTwoYears !== 'yes') return book.resaleValue ? 'sell' : 'donate';
+  if (book.condition === 'worn' && book.nextTwoYears === 'no') return 'recycle';
+  return 'defer';
 }
 
 export function normalizeIsbn(value = '') {
@@ -13,7 +16,11 @@ export function normalizeIsbn(value = '') {
 
 export const dispositionLabels = {
   undecided: '미결정',
-  keep: '실물 보관',
+  seoul: '서울행',
+  keep: '대체 불가 보관',
+  read_archive: '온라인 읽은 책',
+  duplicate: '중복 정리',
+  defer: '보류 상자',
   scan: '자가 스캔',
   millie: '밀리로 대체',
   sell: '중고 판매',
@@ -27,13 +34,26 @@ function csvCell(value) {
 }
 
 export function booksToCsv(books = []) {
-  const fields = ['title', 'author', 'isbn', 'publisher', 'millieStatus', 'disposition', 'box', 'notes'];
-  const header = ['제목', '저자', 'ISBN', '출판사', '밀리 상태', '정리 결정', '박스/위치', '메모'];
+  const fields = ['title', 'author', 'isbn', 'publisher', 'nextTwoYears', 'millieStatus', 'disposition', 'box', 'notes'];
+  const header = ['제목', '저자', 'ISBN', '출판사', '1~2년 내 활용', '밀리 상태', '정리 결정', '박스/위치', '메모'];
   const lines = books.map((book) => fields.map((field) => {
     const value = field === 'disposition' ? dispositionLabels[book[field]] ?? book[field] : book[field];
     return csvCell(value);
   }).join(','));
   return `\uFEFF${header.join(',')}\n${lines.join('\n')}`;
+}
+
+export function buildBackup(books = [], exportedAt = new Date().toISOString()) {
+  return { app: '책갈피', version: 2, exportedAt, books };
+}
+
+export function parseBackup(text) {
+  const parsed = JSON.parse(text);
+  const books = Array.isArray(parsed) ? parsed : parsed?.app === '책갈피' && Array.isArray(parsed.books) ? parsed.books : null;
+  if (!books || books.some((book) => !book || typeof book.title !== 'string')) {
+    throw new Error('올바른 책갈피 백업 파일이 아닙니다.');
+  }
+  return books;
 }
 
 export function createBook(input = {}) {
@@ -51,15 +71,24 @@ export function createBook(input = {}) {
     favorite: false,
     rare: false,
     annotated: false,
-    workReference: false,
-    reread: 'medium',
+    professional: false,
+    frequentReference: false,
+    alreadyRead: false,
+    referenceBook: false,
+    duplicateInSeoul: false,
+    easyToReplace: false,
+    nextTwoYears: 'unsure',
     condition: 'good',
     resaleValue: false,
     createdAt: new Date().toISOString(),
   };
   const book = { ...base, ...input, isbn: normalizeIsbn(input.isbn) };
   book.disposition = input.disposition || recommendDisposition(book);
-  return book;
+  return assignDeferredBox(book);
+}
+
+export function assignDeferredBox(book = {}) {
+  return book.disposition === 'defer' ? { ...book, box: '보류 상자 1' } : book;
 }
 
 export function upsertBook(books = [], book) {
@@ -73,7 +102,7 @@ export function removeBook(books = [], id) {
 }
 
 export function isOutbound(book = {}) {
-  return ['scan', 'millie', 'sell', 'donate', 'recycle'].includes(book.disposition);
+  return ['seoul', 'read_archive', 'duplicate', 'scan', 'millie', 'sell', 'donate', 'recycle'].includes(book.disposition);
 }
 
 export function filterBooks(books = [], { query = '', disposition = 'all' } = {}) {

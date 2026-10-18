@@ -23,7 +23,7 @@
       <div>
         <p class="eyebrow">PRIVATE BOOK ORGANIZER</p>
         <h1 id="intro-title">버릴 책보다,<br><em>남길 이유</em>부터 찾기.</h1>
-        <p>ISBN으로 책을 등록하고 밀리 보유 여부, 필기, 희귀성, 활용도를 확인해 보관·스캔·판매·기증을 결정하세요.</p>
+        <p>“서울 집에 둘 만큼 1~2년 안에 읽거나 참고할까?”를 기준으로 서울행·대체 불가 보관·판매·기부·보류를 결정하세요.</p>
       </div>
       <div id="summary" class="summary" aria-label="책장 요약"></div>
     </section>
@@ -57,20 +57,25 @@
           </div>
 
           <fieldset>
-            <legend>이 책을 남길 이유</legend>
+            <legend>현실적인 정리 기준</legend>
             <div class="checks">
+              <label><input type="checkbox" name="frequentReference"> 자주 참고함</label>
+              <label><input type="checkbox" name="annotated"> 메모·필기 있음</label>
+              <label><input type="checkbox" name="rare"> 절판·희귀본</label>
+              <label><input type="checkbox" name="professional"> 전문자료</label>
+              <label><input type="checkbox" name="duplicateInSeoul"> 서울에 같은 책 있음</label>
+              <label><input type="checkbox" name="easyToReplace"> 다시 구하기 쉬움</label>
+              <label><input type="checkbox" name="alreadyRead"> 이미 읽음</label>
+              <label><input type="checkbox" name="referenceBook"> 참고용 책</label>
               <label><input type="checkbox" name="favorite"> 애장본</label>
-              <label><input type="checkbox" name="annotated"> 필기 있음</label>
-              <label><input type="checkbox" name="rare"> 희귀·절판</label>
-              <label><input type="checkbox" name="workReference"> 업무 참고</label>
               <label><input type="checkbox" name="resaleValue"> 중고 가치</label>
             </div>
           </fieldset>
 
           <div class="two-columns">
             <div class="field">
-              <label for="reread">다시 읽을 가능성</label>
-              <select id="reread" name="reread"><option value="high">높음</option><option value="medium" selected>보통</option><option value="low">낮음</option></select>
+              <label for="next-two-years">1~2년 안에 읽거나 참고할까?</label>
+              <select id="next-two-years" name="nextTwoYears"><option value="yes">확실히 그럴 것</option><option value="unsure" selected>판단이 안 됨</option><option value="no">그럴 가능성 낮음</option></select>
             </div>
             <div class="field">
               <label for="condition">책 상태</label>
@@ -89,7 +94,7 @@
           </div>
 
           <div class="two-columns">
-            <div class="field"><label for="disposition">최종 결정</label><select id="disposition" name="disposition"><option value="auto">자동 추천</option><option value="keep">실물 보관</option><option value="scan">자가 스캔</option><option value="millie">밀리로 대체</option><option value="sell">중고 판매</option><option value="donate">기증</option><option value="recycle">폐기</option></select></div>
+            <div class="field"><label for="disposition">최종 결정</label><select id="disposition" name="disposition"><option value="auto">자동 추천</option><option value="seoul">서울행</option><option value="keep">대체 불가 보관</option><option value="read_archive">온라인 읽은 책</option><option value="duplicate">중복 정리</option><option value="sell">중고 판매</option><option value="donate">기증</option><option value="defer">보류 상자</option><option value="millie">밀리로 대체</option><option value="scan">자가 스캔</option><option value="recycle">폐기</option></select></div>
             <div class="field"><label for="box">박스·위치</label><input id="box" name="box" placeholder="예: 박스 A-3"></div>
           </div>
           <div class="field"><label for="notes">메모</label><textarea id="notes" name="notes" rows="3" placeholder="필기 위치, 다시 볼 이유 등"></textarea></div>
@@ -106,15 +111,16 @@
           <div><span>02</span><h2 id="shelf-title">내 책장</h2></div>
           <div class="data-actions">
             <button id="export-csv" class="button ghost" type="button">CSV</button>
-            <button id="export-json" class="button ghost" type="button">백업</button>
-            <label class="button ghost file-button">복원<input id="import-json" type="file" accept="application/json"></label>
+            <button id="drive-backup" class="button primary" type="button">Google Drive 백업</button>
+            <label class="button ghost file-button" id="drive-restore">Drive에서 복원<input id="import-json" type="file" accept="application/json,.json"></label>
           </div>
         </div>
+        <p class="sync-note">모바일 공유 메뉴에서 Google Drive를 선택해 백업하세요. 복원할 때는 파일 선택 화면의 Drive에서 백업 파일을 고르면 됩니다.</p>
 
         <div class="toolbar">
           <label class="search-box"><span class="sr-only">책 검색</span><input id="search" type="search" placeholder="제목, 저자, ISBN, 박스 검색"></label>
           <select id="disposition-filter" aria-label="정리 결정 필터">
-            <option value="all">모든 결정</option><option value="keep">실물 보관</option><option value="scan">자가 스캔</option><option value="millie">밀리로 대체</option><option value="sell">중고 판매</option><option value="donate">기증</option><option value="recycle">폐기</option>
+            <option value="all">모든 결정</option><option value="seoul">서울행</option><option value="keep">대체 불가 보관</option><option value="read_archive">나의 읽은 책</option><option value="duplicate">중복 정리</option><option value="sell">중고 판매</option><option value="donate">기증</option><option value="defer">보류 상자</option><option value="millie">밀리로 대체</option><option value="scan">자가 스캔</option><option value="recycle">폐기</option>
           </select>
         </div>
 

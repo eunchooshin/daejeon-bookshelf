@@ -1,4 +1,4 @@
-const CACHE = 'book-galpi-v3';
+const CACHE = 'book-galpi-v4';
 const ASSETS = ['./', './index.html', './styles.css', './src/app.js', './src/domain.js', './manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {

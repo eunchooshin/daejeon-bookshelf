@@ -29,7 +29,7 @@ main { width: min(1440px, calc(100% - 44px)); margin: 0 auto; }
 h1 { margin: 12px 0 20px; max-width: 750px; font-family: Georgia, "Batang", serif; font-size: clamp(42px, 6vw, 84px); line-height: .98; letter-spacing: -.055em; font-weight: 500; }
 h1 em { color: var(--forest); font-style: italic; }
 .intro > div > p:last-child { max-width: 680px; color: var(--muted); line-height: 1.75; }
-.summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
 .summary-item { min-height: 122px; padding: 22px; background: var(--white); }
 .summary-item strong { display: block; margin-top: 24px; font-family: Georgia, serif; font-size: 34px; }
 .summary-item span { color: var(--muted); font-size: 12px; }
@@ -64,7 +64,8 @@ legend { padding: 0 6px; }
 .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
 .shelf-area { min-width: 0; }
 .shelf-heading { padding-top: 6px; }
-.data-actions { display: flex; gap: 6px; }
+.data-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.sync-note { margin: -12px 0 20px; color: var(--muted); font-size: 12px; line-height: 1.55; }
 .file-button input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .toolbar { display: grid; grid-template-columns: 1fr 190px; gap: 10px; margin-bottom: 20px; }
 .bookshelf { display: grid; gap: 12px; }
@@ -105,7 +106,7 @@ dialog::backdrop { background: rgba(24,28,24,.68); }
   h1 { font-size: 46px; }
   .summary { grid-template-columns: 1fr 1fr; }
   .summary-item { min-height: 96px; padding: 15px; }
-  .summary-item:last-child { grid-column: 1 / -1; }
+
   .summary-item strong { margin-top: 12px; }
   .workspace { padding-top: 24px; gap: 30px; }
   .form-panel { padding: 18px 14px; }
