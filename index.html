@@ -7,7 +7,7 @@
   <meta name="description" content="대전 집 책 정리를 위한 개인용 책장과 보관·스캔·기증 결정 도우미">
   <title>책갈피 — 대전 책 정리</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=0.4.6">
+  <link rel="stylesheet" href="styles.css?v=0.4.7">
 </head>
 <body>
   <header class="topbar">
@@ -98,7 +98,7 @@
 
             <fieldset id="millie-status" class="choice-field">
               <legend>밀리의 서재</legend>
-              <p class="sync-note">📚 옵시디언에서 검수한 밀리 보유 도서 121권은 제목이 정확히 일치하면 자동 표시됩니다.</p>
+              <p class="sync-note">📚 옵시디언에서 검수한 밀리 보유 도서 121권을 내 책장에 자동으로 넣었고 📱 완전판 있음으로 표시합니다.</p>
               <div class="choice-grid choice-grid-two">
                 <label><input type="radio" name="millieStatus" value="unchecked" checked><span>⏳ 확인 전</span></label>
                 <label><input type="radio" name="millieStatus" value="full"><span>📱 완전판 있음</span></label>
@@ -195,6 +195,6 @@
     window.BookBarcodeDetectorPolyfill = barcodeDetectorPolyfill.BarcodeDetectorPolyfill;
     window.BookBarcodeDetector = window.BarcodeDetector || window.BookBarcodeDetectorPolyfill;
   </script>
-  <script type="module" src="src/app.js?v=0.4.6"></script>
+  <script type="module" src="src/app.js?v=0.4.7"></script>
 </body>
 </html>

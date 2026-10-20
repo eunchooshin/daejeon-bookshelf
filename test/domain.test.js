@@ -12,6 +12,7 @@ import {
   assignDeferredBox,
   buildBackup,
   parseBackup,
+  mergeVerifiedMillieCatalog,
 } from '../src/domain.js';
 
 test('1~2년 안에 확실히 읽거나 자주 참고할 책은 서울행을 권한다', () => {
@@ -77,6 +78,16 @@ test('새 책은 새 기준의 기본값과 추천 결정을 포함한다', () =
 test('검수된 제목의 책은 기존 수동 선택을 해치지 않고 밀리 완전판으로 표시한다', () => {
   assert.equal(createBook({ id: 'millie', title: '세이노의 가르침' }).millieStatus, 'full');
   assert.equal(createBook({ id: 'manual', title: '세이노의 가르침', millieStatus: 'not_found' }).millieStatus, 'not_found');
+});
+
+test('검수된 밀리 도서 121권을 내 책장에 중복 없이 추가한다', () => {
+  const existing = createBook({ id: 'manual', title: '세이노의 가르침', millieStatus: 'not_found' });
+  const imported = mergeVerifiedMillieCatalog([existing], '2026-10-20T00:00:00.000Z');
+  assert.equal(imported.length, 121);
+  assert.equal(imported.find((book) => book.id === 'manual').millieStatus, 'not_found');
+  assert.equal(imported.find((book) => book.title === '습관의 힘').millieStatus, 'full');
+  assert.equal(imported.find((book) => book.title === '습관의 힘').source, 'cls-millie-catalog-2026-10-08');
+  assert.equal(mergeVerifiedMillieCatalog(imported).length, 121);
 });
 
 test('책장은 추가와 수정 시 기존 순서를 안전하게 유지한다', () => {

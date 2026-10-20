@@ -42,21 +42,23 @@ test('최종 결정 기준을 눌러서 펼쳐 볼 수 있다', async () => {
   assert.match(html, /보류 상자 1개에만 보관/);
 });
 
-test('검수된 밀리 목록 자동 표시를 화면에서 안내한다', async () => {
+test('검수된 밀리 목록을 내 책장에 넣고 자동 표시한다고 안내한다', async () => {
   const html = await readFile(new URL('index.html', root), 'utf8');
   const app = await readFile(new URL('src/app.js', root), 'utf8');
-  assert.match(html, /옵시디언에서 검수한 밀리 보유 도서 121권/);
+  assert.match(html, /밀리 보유 도서 121권을 내 책장에 자동으로 넣었/);
   assert.match(app, /isVerifiedMillieTitle/);
   assert.match(app, /setFormChoice\('millieStatus', 'full'\)/);
+  assert.match(app, /mergeVerifiedMillieCatalog/);
+  assert.match(app, /daejeon-bookshelf\.millie-catalog-2026-10-08/);
 });
 
 test('새 화면과 이전 CSS가 섞이지 않도록 정적 파일 버전을 고정한다', async () => {
   const html = await readFile(new URL('index.html', root), 'utf8');
   const worker = await readFile(new URL('sw.js', root), 'utf8');
-  assert.match(html, /styles\.css\?v=0\.4\.6/);
-  assert.match(html, /src\/app\.js\?v=0\.4\.6/);
-  assert.match(worker, /styles\.css\?v=0\.4\.6/);
-  assert.match(worker, /src\/app\.js\?v=0\.4\.6/);
+  assert.match(html, /styles\.css\?v=0\.4\.7/);
+  assert.match(html, /src\/app\.js\?v=0\.4\.7/);
+  assert.match(worker, /styles\.css\?v=0\.4\.7/);
+  assert.match(worker, /src\/app\.js\?v=0\.4\.7/);
   assert.match(worker, /src\/millie-catalog\.js/);
 });
 

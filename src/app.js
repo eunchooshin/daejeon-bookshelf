@@ -2,6 +2,7 @@ import {
   buildBackup,
   booksToCsv,
   createBook,
+  mergeVerifiedMillieCatalog,
   dispositionLabels,
   filterBooks,
   isOutbound,
@@ -25,6 +26,8 @@ import {
 import { isVerifiedMillieTitle } from './millie-catalog.js';
 
 const STORAGE_KEY = 'daejeon-bookshelf.v1';
+const MILLIE_IMPORT_KEY = 'daejeon-bookshelf.millie-catalog-2026-10-08';
+const MILLIE_IMPORT_VERSION = 'cls-121-v1';
 const millieLabels = { unchecked: '밀리 확인 전', full: '밀리 완전판', partial: '밀리 일부·요약', not_found: '밀리 없음' };
 const $ = (selector) => document.querySelector(selector);
 
@@ -53,9 +56,18 @@ let torchOn = false;
 function loadBooks() {
   try {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    return Array.isArray(parsed) ? parsed.map((book) => createBook(book)) : [];
+    let loaded = Array.isArray(parsed) ? parsed.map((book) => createBook(book)) : [];
+    if (localStorage.getItem(MILLIE_IMPORT_KEY) !== MILLIE_IMPORT_VERSION) {
+      loaded = mergeVerifiedMillieCatalog(loaded);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(loaded));
+      localStorage.setItem(MILLIE_IMPORT_KEY, MILLIE_IMPORT_VERSION);
+    }
+    return loaded;
   } catch {
-    return [];
+    const loaded = mergeVerifiedMillieCatalog([]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(loaded));
+    localStorage.setItem(MILLIE_IMPORT_KEY, MILLIE_IMPORT_VERSION);
+    return loaded;
   }
 }
 

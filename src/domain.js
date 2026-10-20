@@ -1,4 +1,8 @@
-import { applyVerifiedMillieStatus } from './millie-catalog.js';
+import {
+  applyVerifiedMillieStatus,
+  MILLIE_VERIFIED_TITLES,
+  normalizeBookTitle,
+} from './millie-catalog.js';
 
 export function recommendDisposition(book = {}) {
   if (book.duplicateInSeoul) return 'duplicate';
@@ -88,6 +92,26 @@ export function createBook(input = {}) {
   book.millieStatus = applyVerifiedMillieStatus(book);
   book.disposition = input.disposition || recommendDisposition(book);
   return assignDeferredBox(book);
+}
+
+export function mergeVerifiedMillieCatalog(books = [], createdAt = new Date().toISOString()) {
+  const merged = books.map((book) => createBook(book));
+  const existingTitles = new Set(merged.map((book) => normalizeBookTitle(book.title)));
+
+  MILLIE_VERIFIED_TITLES.forEach((title, index) => {
+    const normalizedTitle = normalizeBookTitle(title);
+    if (!normalizedTitle || existingTitles.has(normalizedTitle)) return;
+    merged.push(createBook({
+      id: `millie-verified-${String(index + 1).padStart(3, '0')}`,
+      title,
+      millieStatus: 'full',
+      source: 'cls-millie-catalog-2026-10-08',
+      createdAt,
+    }));
+    existingTitles.add(normalizedTitle);
+  });
+
+  return merged;
 }
 
 export function assignDeferredBox(book = {}) {
