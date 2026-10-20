@@ -50,16 +50,18 @@ test('검수된 밀리 목록을 내 책장에 넣고 자동 표시한다고 안
   assert.match(app, /setFormChoice\('millieStatus', 'full'\)/);
   assert.match(app, /mergeVerifiedMillieCatalog/);
   assert.match(app, /daejeon-bookshelf\.millie-catalog-2026-10-08/);
+  assert.match(app, /cls-121-v2/);
+  assert.match(app, /📱 밀리에도 있음/);
 });
 
 test('새 화면과 이전 CSS가 섞이지 않도록 정적 파일 버전을 고정한다', async () => {
   const html = await readFile(new URL('index.html', root), 'utf8');
   const worker = await readFile(new URL('sw.js', root), 'utf8');
-  assert.match(html, /styles\.css\?v=0\.4\.7/);
-  assert.match(html, /src\/app\.js\?v=0\.4\.7/);
-  assert.match(worker, /styles\.css\?v=0\.4\.7/);
-  assert.match(worker, /src\/app\.js\?v=0\.4\.7/);
-  assert.match(worker, /src\/millie-catalog\.js/);
+  assert.match(html, /styles\.css\?v=0\.4\.8/);
+  assert.match(html, /src\/app\.js\?v=0\.4\.8/);
+  assert.match(worker, /styles\.css\?v=0\.4\.8/);
+  assert.match(worker, /src\/app\.js\?v=0\.4\.8/);
+  assert.match(worker, /book-galpi-v14/);
 });
 
 test('바코드 폴리필 자산을 앱 자체에서 불러온다', async () => {
