@@ -64,7 +64,7 @@ test('책장 필터 드롭다운에도 결정별 이모지를 표시한다', asy
 
 test('상단 요약은 보관·스캔·중복·밀리·판매 체계를 이모지와 함께 보여준다', async () => {
   const app = await readFile(new URL('src/app.js', root), 'utf8');
-  for (const label of ['📚 전체', '🏠 서울 보관', '🏡 대전 보관', '📄 스캔', '👯 중복 정리', '📱 밀리 대체', '💰 중고 판매']) {
+  for (const label of ['📚 전체', '🏠 서울 보관', '🏡 대전 보관', '📄 스캔', '👯 중복 정리', '📱 밀리 대체', '💰 중고 판매', '📦 보류']) {
     assert.match(app, new RegExp(`summaryItem\\('${label}'`));
   }
   assert.doesNotMatch(app, /summaryItem\('온라인 읽은 책'/);
@@ -73,12 +73,12 @@ test('상단 요약은 보관·스캔·중복·밀리·판매 체계를 이모�
 test('새 화면과 이전 CSS가 섞이지 않도록 정적 파일 버전을 고정한다', async () => {
   const html = await readFile(new URL('index.html', root), 'utf8');
   const worker = await readFile(new URL('sw.js', root), 'utf8');
-  assert.match(html, /styles\.css\?v=0\.4\.11/);
-  assert.match(html, /src\/app\.js\?v=0\.4\.11/);
-  assert.match(worker, /styles\.css\?v=0\.4\.11/);
-  assert.match(worker, /src\/app\.js\?v=0\.4\.11/);
+  assert.match(html, /styles\.css\?v=0\.4\.12/);
+  assert.match(html, /src\/app\.js\?v=0\.4\.12/);
+  assert.match(worker, /styles\.css\?v=0\.4\.12/);
+  assert.match(worker, /src\/app\.js\?v=0\.4\.12/);
   assert.match(worker, /src\/millie-covers\.js/);
-  assert.match(worker, /book-galpi-v17/);
+  assert.match(worker, /book-galpi-v18/);
 });
 
 test('바코드 폴리필 자산을 앱 자체에서 불러온다', async () => {

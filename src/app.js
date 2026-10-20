@@ -117,6 +117,7 @@ function renderSummary() {
     summaryItem('👯 중복 정리', books.filter((book) => book.disposition.startsWith('duplicate_')).length),
     summaryItem('📱 밀리 대체', books.filter((book) => book.disposition.startsWith('millie_')).length),
     summaryItem('💰 중고 판매', books.filter((book) => book.disposition === 'sell').length),
+    summaryItem('📦 보류', books.filter((book) => book.disposition === 'defer').length),
   );
 }
 
