@@ -15,7 +15,10 @@ import {
   googleBookToMetadata,
   googleBooksJsonpUrl,
   localBookMetadata,
+  mergeBookMetadata,
   millieSearchUrl,
+  nlkWorkerToMetadata,
+  nlkWorkerUrl,
   openLibraryJsonpUrl,
   pickBarcodeDetector,
 } from './integrations.js';
@@ -290,13 +293,30 @@ async function lookupIsbn() {
     return false;
   }
   $('#isbn').value = isbn;
+  elements.lookupStatus.textContent = '국립중앙도서관에서 책과 표지를 찾는 중…';
+  let preferredMetadata = null;
+  try {
+    const workerResponse = await fetch(nlkWorkerUrl(isbn));
+    const workerMetadata = workerResponse.ok
+      ? nlkWorkerToMetadata(await workerResponse.json())
+      : null;
+    preferredMetadata = mergeBookMetadata(workerMetadata, localBookMetadata(isbn));
+    if (preferredMetadata?.coverUrl && applyBookMetadata(preferredMetadata)) {
+      elements.lookupStatus.textContent = '국립중앙도서관에서 책과 표지 정보를 불러왔어요.';
+      return true;
+    }
+  } catch {
+    // Worker가 아직 설정되지 않았거나 일시적으로 실패하면 기존 검색 경로를 계속 사용한다.
+  }
+
   const verifiedMetadata = localBookMetadata(isbn);
-  if (verifiedMetadata) {
-    applyBookMetadata(verifiedMetadata);
+  preferredMetadata = mergeBookMetadata(preferredMetadata, verifiedMetadata);
+  if (preferredMetadata?.coverUrl) {
+    applyBookMetadata(preferredMetadata);
     elements.lookupStatus.textContent = '검수 완료된 국내 도서 정보를 불러왔어요.';
     return true;
   }
-  elements.lookupStatus.textContent = '국내외 도서 정보를 찾는 중…';
+  elements.lookupStatus.textContent = '다른 국내외 도서 정보도 찾는 중…';
   try {
     const [googleResult, openLibraryResult] = await Promise.allSettled([
       fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(`isbn:${isbn}`)}&maxResults=5`).then((response) => response.ok ? response.json() : null),
@@ -327,7 +347,10 @@ async function lookupIsbn() {
         };
       }
     }
-    const found = applyBookMetadata(googleMetadata || openMetadata || jsonpMetadata);
+    const found = applyBookMetadata(mergeBookMetadata(
+      preferredMetadata,
+      googleMetadata || openMetadata || jsonpMetadata,
+    ));
     elements.lookupStatus.textContent = found
       ? '책 정보를 불러왔어요. 이제 밀리에서 제목으로 확인할 수 있어요.'
       : '책 정보를 찾지 못했어요. 제목을 직접 입력하면 밀리 검색이 됩니다.';

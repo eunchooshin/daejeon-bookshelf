@@ -31,9 +31,52 @@ const VERIFIED_KOREAN_BOOKS = {
     title: '더 시스템',
     author: '스콧 애덤스',
     publisher: '베리북',
-    coverUrl: '',
+    coverUrl: 'https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9791188102051.jpg',
   },
 };
+
+export function mergeBookMetadata(primary, fallback) {
+  if (!primary) return fallback || null;
+  if (!fallback) return primary;
+  return {
+    title: primary.title || fallback.title || '',
+    author: primary.author || fallback.author || '',
+    publisher: primary.publisher || fallback.publisher || '',
+    coverUrl: primary.coverUrl || fallback.coverUrl || '',
+  };
+}
+
+export function nlkWorkerUrl(isbn) {
+  const clean = String(isbn).replace(/[^0-9X]/gi, '').toUpperCase();
+  return `https://book-galpi-api.eunchooshin.workers.dev/book?isbn=${encodeURIComponent(clean)}`;
+}
+
+export function nlkWorkerToMetadata(data) {
+  if (!data?.title) return null;
+  return {
+    title: data.title || '',
+    author: data.author || '',
+    publisher: data.publisher || '',
+    coverUrl: String(data.coverUrl || '').replace(/^http:/, 'https:'),
+  };
+}
+
+export function nlkBookToMetadata(data, isbn = '') {
+  const clean = String(isbn).replace(/[^0-9X]/gi, '').toUpperCase();
+  const docs = Array.isArray(data?.docs)
+    ? data.docs
+    : Array.isArray(data?.docs?.e)
+      ? data.docs.e
+      : data?.docs?.e ? [data.docs.e] : [];
+  const item = docs.find((book) => String(book?.EA_ISBN || '').replace(/[^0-9X]/gi, '').toUpperCase() === clean) || docs[0];
+  if (!item?.TITLE) return null;
+  return {
+    title: item.TITLE || '',
+    author: item.AUTHOR || '',
+    publisher: item.PUBLISHER || '',
+    coverUrl: String(item.TITLE_URL || '').replace(/^http:/, 'https:'),
+  };
+}
 
 export function localBookMetadata(isbn) {
   return VERIFIED_KOREAN_BOOKS[String(isbn).replace(/[^0-9X]/gi, '').toUpperCase()] || null;

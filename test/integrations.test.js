@@ -5,7 +5,11 @@ import {
   googleBookToMetadata,
   googleBooksJsonpUrl,
   localBookMetadata,
+  mergeBookMetadata,
   millieSearchUrl,
+  nlkBookToMetadata,
+  nlkWorkerToMetadata,
+  nlkWorkerUrl,
   openLibraryJsonpUrl,
   pickBarcodeDetector,
 } from '../src/integrations.js';
@@ -55,12 +59,72 @@ test('Google Books ISBN 결과를 책 메타데이터로 변환한다', () => {
   });
 });
 
+test('책갈피 Worker 주소는 정규화한 ISBN만 전달한다', () => {
+  assert.equal(
+    nlkWorkerUrl('979-11-88102-05-1'),
+    'https://book-galpi-api.eunchooshin.workers.dev/book?isbn=9791188102051',
+  );
+});
+
+test('책갈피 Worker 응답을 표지 포함 메타데이터로 변환한다', () => {
+  assert.deepEqual(nlkWorkerToMetadata({
+    isbn: '9791188102051',
+    title: '더 시스템',
+    author: '스콧 애덤스',
+    publisher: '베리북',
+    coverUrl: 'http://example.com/cover.jpg',
+  }), {
+    title: '더 시스템',
+    author: '스콧 애덤스',
+    publisher: '베리북',
+    coverUrl: 'https://example.com/cover.jpg',
+  });
+});
+
+test('국립중앙도서관에 표지가 없으면 검수된 보조 표지만 합친다', () => {
+  assert.deepEqual(mergeBookMetadata({
+    title: '더 시스템',
+    author: '지은이: 스콧 애덤스 ;옮긴이: 김인수',
+    publisher: '베리북',
+    coverUrl: '',
+  }, {
+    title: '다른 제목',
+    author: '다른 저자',
+    publisher: '다른 출판사',
+    coverUrl: 'https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9791188102051.jpg',
+  }), {
+    title: '더 시스템',
+    author: '지은이: 스콧 애덤스 ;옮긴이: 김인수',
+    publisher: '베리북',
+    coverUrl: 'https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9791188102051.jpg',
+  });
+});
+
+test('국립중앙도서관 응답에서 정확한 ISBN과 표지를 추출한다', () => {
+  const data = {
+    TOTAL_COUNT: '1',
+    docs: [{
+      TITLE: '표지가 있는 책',
+      AUTHOR: '홍길동 지음',
+      PUBLISHER: '테스트출판사',
+      EA_ISBN: '9791188102051',
+      TITLE_URL: 'http://example.com/cover.jpg',
+    }],
+  };
+  assert.deepEqual(nlkBookToMetadata(data, '979-11-88102-05-1'), {
+    title: '표지가 있는 책',
+    author: '홍길동 지음',
+    publisher: '테스트출판사',
+    coverUrl: 'https://example.com/cover.jpg',
+  });
+});
+
 test('외부 도서 DB에 없는 검수 완료 국내 ISBN은 내장 목록에서 찾는다', () => {
   assert.deepEqual(localBookMetadata('9791188102051'), {
     title: '더 시스템',
     author: '스콧 애덤스',
     publisher: '베리북',
-    coverUrl: '',
+    coverUrl: 'https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9791188102051.jpg',
   });
 });
 

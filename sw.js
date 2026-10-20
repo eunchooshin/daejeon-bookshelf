@@ -1,4 +1,4 @@
-const CACHE = 'book-galpi-v7';
+const CACHE = 'book-galpi-v8';
 const ASSETS = [
   './',
   './index.html',
