@@ -215,13 +215,18 @@ function openForm() {
   $('#isbn').focus();
 }
 
+function setFormChoice(name, value) {
+  const choices = elements.form.querySelectorAll(`input[type="radio"][name="${name}"]`);
+  choices.forEach((choice) => { choice.checked = choice.value === value; });
+}
+
 function resetForm() {
   elements.form.reset();
   $('#book-id').value = '';
-  $('#next-two-years').value = 'unsure';
-  $('#condition').value = 'good';
-  $('#millie-status').value = 'unchecked';
-  $('#disposition').value = 'auto';
+  setFormChoice('nextTwoYears', 'unsure');
+  setFormChoice('condition', 'good');
+  setFormChoice('millieStatus', 'unchecked');
+  setFormChoice('disposition', 'auto');
   draftCoverUrl = '';
   renderCoverPreview('', '');
   elements.formTitle.textContent = '새 책 등록';
@@ -233,10 +238,11 @@ function editBook(book) {
   for (const [key, value] of Object.entries(book)) {
     const field = elements.form.elements.namedItem(key);
     if (!field) continue;
-    if (field.type === 'checkbox') field.checked = Boolean(value);
+    if (typeof field.length === 'number' && field[0]?.type === 'radio') setFormChoice(key, value);
+    else if (field.type === 'checkbox') field.checked = Boolean(value);
     else field.value = value ?? '';
   }
-  $('#disposition').value = book.disposition;
+  setFormChoice('disposition', book.disposition);
   draftCoverUrl = book.coverUrl || '';
   renderCoverPreview(book.title, draftCoverUrl);
   elements.formTitle.textContent = '책 정보 수정';

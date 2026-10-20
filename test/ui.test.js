@@ -26,6 +26,22 @@ test('정리 선택지는 빠르게 구분할 수 있는 이모지를 포함한�
   }
 });
 
+test('정리 선택지는 드롭다운 대신 한 번에 보이는 라디오 버튼이다', async () => {
+  const html = await readFile(new URL('index.html', root), 'utf8');
+  for (const name of ['nextTwoYears', 'condition', 'millieStatus', 'disposition']) {
+    assert.doesNotMatch(html, new RegExp(`<select[^>]+name=["']${name}["']`));
+    assert.match(html, new RegExp(`type=["']radio["'][^>]+name=["']${name}["']`));
+  }
+  assert.match(html, /class=["'][^"']*choice-grid/);
+});
+
+test('최종 결정 기준을 눌러서 펼쳐 볼 수 있다', async () => {
+  const html = await readFile(new URL('index.html', root), 'utf8');
+  assert.match(html, /<details class=["']criteria-guide["']/);
+  assert.match(html, /🧭 최종 결정 기준 보기/);
+  assert.match(html, /보류 상자 1개에만 보관/);
+});
+
 test('바코드 폴리필 자산을 앱 자체에서 불러온다', async () => {
   const html = await readFile(new URL('index.html', root), 'utf8');
   assert.match(html, /vendor\/zbar-wasm\.js/);
