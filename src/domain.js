@@ -8,7 +8,6 @@ import { millieCoverForTitle } from './millie-covers.js';
 
 export function recommendDisposition(book = {}) {
   if (book.duplicateInSeoul) return 'duplicate';
-  if (book.alreadyRead && book.referenceBook) return 'read_archive';
   if (book.nextTwoYears === 'yes' || book.frequentReference) return 'seoul';
   if (book.favorite || book.rare || book.professional || book.annotated) return 'keep';
   if (book.millieStatus === 'full' && book.nextTwoYears === 'no') return 'millie';
@@ -26,7 +25,7 @@ export const dispositionLabels = {
   undecided: '❔ 미결정',
   seoul: '🚚 서울행',
   keep: '🔐 대체 불가 보관',
-  read_archive: '📚 온라인 읽은 책',
+
   duplicate: '👯 중복 정리',
   defer: '📦 보류 상자',
   scan: '📄 자가 스캔',
@@ -92,7 +91,7 @@ export function createBook(input = {}) {
   };
   const book = { ...base, ...input, isbn: normalizeIsbn(input.isbn) };
   book.millieStatus = applyVerifiedMillieStatus(book);
-  book.disposition = input.disposition || recommendDisposition(book);
+  book.disposition = input.disposition === 'read_archive' ? 'defer' : input.disposition || recommendDisposition(book);
   return assignDeferredBox(book);
 }
 
@@ -142,7 +141,7 @@ export function removeBook(books = [], id) {
 }
 
 export function isOutbound(book = {}) {
-  return ['seoul', 'read_archive', 'duplicate', 'scan', 'millie', 'sell', 'donate', 'recycle'].includes(book.disposition);
+  return ['seoul', 'duplicate', 'scan', 'millie', 'sell', 'donate', 'recycle'].includes(book.disposition);
 }
 
 export function filterBooks(books = [], { query = '', disposition = 'all' } = {}) {

@@ -36,8 +36,8 @@ test('쉽게 다시 구할 수 있고 읽을 시점이 불분명하면 판매 �
   assert.equal(recommendDisposition({ easyToReplace: true, nextTwoYears: 'no', resaleValue: false }), 'donate');
 });
 
-test('이미 읽은 참고용 책은 온라인 나의 읽은 책으로 보낸다', () => {
-  assert.equal(recommendDisposition({ alreadyRead: true, referenceBook: true }), 'read_archive');
+test('이미 읽은 책도 별도 온라인 분류 없이 다른 정리 기준을 따른다', () => {
+  assert.equal(recommendDisposition({ alreadyRead: true, referenceBook: true }), 'defer');
 });
 
 test('판단 근거가 부족하면 보류 상자로 보내고 상자는 하나로 고정한다', () => {
@@ -130,10 +130,11 @@ test('제목 검색과 정리 결정 필터를 함께 적용한다', () => {
   assert.equal(filterBooks(books, { query: '추츄', disposition: 'all' }).length, 1);
 });
 
-test('서울행과 온라인 읽은 책을 포함해 대전 집에서 나갈 책을 센다', () => {
-  for (const disposition of ['seoul', 'read_archive', 'duplicate', 'scan', 'millie', 'sell', 'donate', 'recycle']) {
+test('실물책 정리 대상으로 대전 집에서 나갈 책을 센다', () => {
+  for (const disposition of ['seoul', 'duplicate', 'scan', 'millie', 'sell', 'donate', 'recycle']) {
     assert.equal(isOutbound({ disposition }), true);
   }
+  assert.equal(isOutbound({ disposition: 'read_archive' }), false);
   assert.equal(isOutbound({ disposition: 'keep' }), false);
   assert.equal(isOutbound({ disposition: 'defer' }), false);
 });

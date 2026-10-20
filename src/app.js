@@ -110,10 +110,10 @@ function summaryItem(label, value) {
 
 function renderSummary() {
   elements.summary.replaceChildren(
-    summaryItem('내 책장', books.length),
-    summaryItem('서울행', books.filter((book) => book.disposition === 'seoul').length),
-    summaryItem('온라인 읽은 책', books.filter((book) => book.disposition === 'read_archive').length),
-    summaryItem('대전에서 나갈 책', books.filter(isOutbound).length),
+    summaryItem('📚 내 책장', books.length),
+    summaryItem('🚚 서울행', books.filter((book) => book.disposition === 'seoul').length),
+    summaryItem('📱 밀리로 대체', books.filter((book) => book.disposition === 'millie').length),
+    summaryItem('🚪 실물책 정리 대상', books.filter(isOutbound).length),
   );
 }
 

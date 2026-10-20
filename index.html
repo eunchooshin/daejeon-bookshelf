@@ -7,7 +7,7 @@
   <meta name="description" content="대전 집 책 정리를 위한 개인용 책장과 보관·스캔·기증 결정 도우미">
   <title>책갈피 — 대전 책 정리</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=0.4.9">
+  <link rel="stylesheet" href="styles.css?v=0.4.10">
 </head>
 <body>
   <header class="topbar">
@@ -114,7 +114,6 @@
             <div class="criteria-list">
               <p><strong>🚚 서울행</strong><span>앞으로 1~2년 안에 확실히 읽거나 자주 참고할 책</span></p>
               <p><strong>🔐 대체 불가 보관</strong><span>절판·전문자료·필기가 있어 다시 구하기 어려운 책</span></p>
-              <p><strong>📚 온라인 읽은 책</strong><span>이미 읽었고 기록이나 참고용으로 남길 책</span></p>
               <p><strong>👯 중복 정리</strong><span>서울에도 같은 책이 있어 상태 좋은 1권만 남길 때</span></p>
               <p><strong>💰 중고 판매·🎁 기증</strong><span>다시 구하기 쉽고 읽을 시점이 불분명한 책</span></p>
               <p><strong>📦 보류 상자</strong><span>지금 결정하기 어렵다면 보류 상자 1개에만 보관</span></p>
@@ -130,7 +129,6 @@
               <label><input type="radio" name="disposition" value="auto" checked><span>✨ 자동 추천</span></label>
               <label><input type="radio" name="disposition" value="seoul"><span>🚚 서울행</span></label>
               <label><input type="radio" name="disposition" value="keep"><span>🔐 대체 불가 보관</span></label>
-              <label><input type="radio" name="disposition" value="read_archive"><span>📚 온라인 읽은 책</span></label>
               <label><input type="radio" name="disposition" value="duplicate"><span>👯 중복 정리</span></label>
               <label><input type="radio" name="disposition" value="sell"><span>💰 중고 판매</span></label>
               <label><input type="radio" name="disposition" value="donate"><span>🎁 기증</span></label>
@@ -165,7 +163,7 @@
         <div class="toolbar">
           <label class="search-box"><span class="sr-only">책 검색</span><input id="search" type="search" placeholder="제목, 저자, ISBN, 박스 검색"></label>
           <select id="disposition-filter" aria-label="정리 결정 필터">
-            <option value="all">🗂️ 모든 결정</option><option value="seoul">🚚 서울행</option><option value="keep">🔐 대체 불가 보관</option><option value="read_archive">📚 온라인 읽은 책</option><option value="duplicate">👯 중복 정리</option><option value="sell">💰 중고 판매</option><option value="donate">🎁 기증</option><option value="defer">📦 보류 상자</option><option value="millie">📱 밀리로 대체</option><option value="scan">📄 자가 스캔</option><option value="recycle">♻️ 폐기</option>
+            <option value="all">🗂️ 모든 결정</option><option value="seoul">🚚 서울행</option><option value="keep">🔐 대체 불가 보관</option><option value="duplicate">👯 중복 정리</option><option value="sell">💰 중고 판매</option><option value="donate">🎁 기증</option><option value="defer">📦 보류 상자</option><option value="millie">📱 밀리로 대체</option><option value="scan">📄 자가 스캔</option><option value="recycle">♻️ 폐기</option>
           </select>
         </div>
 
@@ -195,6 +193,6 @@
     window.BookBarcodeDetectorPolyfill = barcodeDetectorPolyfill.BarcodeDetectorPolyfill;
     window.BookBarcodeDetector = window.BarcodeDetector || window.BookBarcodeDetectorPolyfill;
   </script>
-  <script type="module" src="src/app.js?v=0.4.9"></script>
+  <script type="module" src="src/app.js?v=0.4.10"></script>
 </body>
 </html>
