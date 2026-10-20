@@ -117,9 +117,8 @@ function renderSummary() {
     summaryItem('📚 실물책', books.length),
     summaryItem('❔ 확인 필요', books.filter((book) => book.disposition === 'review').length),
     summaryItem('🏠 서울', books.filter((book) => book.disposition === 'keep_seoul').length),
-    summaryItem('🏡 대전', books.filter((book) => book.disposition === 'keep_daejeon').length),
     summaryItem('📤 스캔', books.filter((book) => book.disposition === 'scan_pending').length),
-    summaryItem('💰 판매', books.filter((book) => book.disposition === 'sell').length),
+    summaryItem('💰 대전 판매', books.filter((book) => book.disposition === 'sell').length),
     summaryItem('🎁 기증', books.filter((book) => book.disposition === 'donate').length),
     summaryItem('♻️ 폐기', books.filter((book) => book.disposition === 'recycle').length),
   );
@@ -274,7 +273,7 @@ function renderAvailabilityAlert() {
   elements.availabilityBadges.replaceChildren(...badges);
   elements.availabilityMessage.textContent = availability.any
     ? '실물책은 상태가 좋으면 판매하고, 안 팔리면 기증하세요. 훼손됐으면 폐기해도 돼요.'
-    : '스캔 보내기, 서울 보관, 대전 보관 중에서 선택하세요.';
+    : '✨ 상태 좋음 → 💰 대전 판매 · 📚 내용 좋음 → 📤 스캔 · ❤️ 소장 원함 → 🏠 서울 보관 · 🚫 필요 없음 → ♻️ 폐기';
 }
 
 function resetForm() {

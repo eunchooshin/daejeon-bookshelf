@@ -7,7 +7,7 @@
   <meta name="description" content="대전 집 책 정리를 위한 개인용 책장과 보관·스캔·기증 결정 도우미">
   <title>책갈피 — 대전 책 정리</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=0.4.16">
+  <link rel="stylesheet" href="styles.css?v=0.4.17">
 </head>
 <body>
   <header class="topbar">
@@ -34,7 +34,12 @@
       <div class="sorting-branches">
         <article class="sorting-branch no-alternative">
           <h3>⚠️ 어딘가 없음</h3>
-          <p>📤 스캔 보내기　🏠 서울 보관　🏡 대전 보관</p>
+          <ul class="sorting-rules">
+            <li><strong>✨ 상태 좋음</strong><span>→</span><b>💰 대전 판매</b></li>
+            <li><strong>📚 내용 좋음</strong><span>→</span><b>📤 스캔</b></li>
+            <li><strong>❤️ 소장 원함</strong><span>→</span><b>🏠 서울 보관</b></li>
+            <li><strong>🚫 필요 없음</strong><span>→</span><b>♻️ 폐기</b></li>
+          </ul>
         </article>
         <article class="sorting-branch has-alternative">
           <h3>✅ 어딘가 있음</h3>
@@ -42,7 +47,7 @@
           <strong>상태 좋음 → 💰 판매　·　안 팔리면 🎁 기증　·　훼손 → ♻️ 폐기</strong>
         </article>
       </div>
-      <p class="box-plan">📦 준비: 서울 · 대전 · 스캔 · 판매 · 기증 <strong>5개 상자</strong> + 폐기 봉투</p>
+      <p class="box-plan">📦 준비: 서울 보관 · 스캔 · 대전 판매 · 기증 <strong>4개 상자</strong> + 폐기 봉투</p>
     </section>
 
     <section class="workspace" aria-label="책 정리 작업공간">
@@ -125,7 +130,7 @@
           <details class="criteria-guide">
             <summary>🧭 최종 결정 기준 보기</summary>
             <div class="criteria-list">
-              <p><strong>⚠️ 대체 자료 없음</strong><span>📤 스캔 보내기 / 자주 볼 책은 🏠 서울 / 장기 보관은 🏡 대전</span></p>
+              <p><strong>⚠️ 대체 자료 없음</strong><span>✨ 상태 좋음 → 💰 대전 판매 / 📚 내용 좋음 → 📤 스캔 / ❤️ 소장 원함 → 🏠 서울 보관 / 🚫 필요 없음 → ♻️ 폐기</span></p>
               <p><strong>✅ 대체 자료 있음</strong><span>📄 PDF · 📱 밀리 · 👯 실물 중복은 동시에 표시</span></p>
               <p><strong>✨ 상태 좋음</strong><span>💰 판매 중으로 시작하고, 안 팔리면 직접 🎁 기증으로 변경</span></p>
               <p><strong>🩹 훼손·오염</strong><span>♻️ 폐기</span></p>
@@ -138,12 +143,11 @@
             <div class="choice-grid choice-grid-two">
               <label><input type="radio" name="disposition" value="auto" checked><span>✨ 원칙대로 자동 추천</span></label>
               <label><input type="radio" name="disposition" value="review"><span>❔ 상태 확인 필요</span></label>
-              <label><input type="radio" name="disposition" value="keep_seoul"><span>🏠 서울 보관 · 자주 볼 책</span></label>
-              <label><input type="radio" name="disposition" value="keep_daejeon"><span>🏡 대전 보관 · 장기 보관</span></label>
-              <label><input type="radio" name="disposition" value="scan_pending"><span>📤 스캔 보내기</span></label>
-              <label><input type="radio" name="disposition" value="sell"><span>💰 판매 중 · 상태 좋음</span></label>
+              <label><input type="radio" name="disposition" value="keep_seoul"><span>❤️ 소장 원함 → 🏠 서울 보관</span></label>
+              <label><input type="radio" name="disposition" value="scan_pending"><span>📚 내용 좋음 → 📤 스캔</span></label>
+              <label><input type="radio" name="disposition" value="sell"><span>✨ 상태 좋음 → 💰 대전 판매</span></label>
               <label><input type="radio" name="disposition" value="donate"><span>🎁 기증</span></label>
-              <label><input type="radio" name="disposition" value="recycle"><span>♻️ 폐기</span></label>
+              <label><input type="radio" name="disposition" value="recycle"><span>🚫 필요 없음 → ♻️ 폐기</span></label>
             </div>
           </fieldset>
 
@@ -171,7 +175,7 @@
         <div class="toolbar">
           <label class="search-box"><span class="sr-only">책 검색</span><input id="search" type="search" placeholder="제목, 저자, ISBN, 박스 검색"></label>
           <select id="disposition-filter" aria-label="정리 결정 필터">
-            <option value="all">🗂️ 모든 목적지</option><option value="review">❔ 상태 확인 필요</option><option value="keep_seoul">🏠 서울 보관</option><option value="keep_daejeon">🏡 대전 보관</option><option value="scan_pending">📤 스캔 보내기</option><option value="sell">💰 판매 중</option><option value="donate">🎁 기증</option><option value="recycle">♻️ 폐기</option>
+            <option value="all">🗂️ 모든 목적지</option><option value="review">❔ 상태 확인 필요</option><option value="keep_seoul">🏠 서울 보관</option><option value="scan_pending">📤 스캔</option><option value="sell">💰 대전 판매</option><option value="donate">🎁 기증</option><option value="recycle">♻️ 폐기</option>
           </select>
         </div>
 
@@ -203,6 +207,6 @@
     window.BookBarcodeDetectorPolyfill = barcodeDetectorPolyfill.BarcodeDetectorPolyfill;
     window.BookBarcodeDetector = window.BarcodeDetector || window.BookBarcodeDetectorPolyfill;
   </script>
-  <script type="module" src="src/app.js?v=0.4.16"></script>
+  <script type="module" src="src/app.js?v=0.4.17"></script>
 </body>
 </html>

@@ -48,12 +48,13 @@ test('책 검색 직후 큰 대체 자료 안내 카드를 인라인으로 보�
   assert.match(css, /\.availability-alert h3[^}]*font-size:\s*1\.55rem/);
 });
 
-test('상단에 새 분류 원칙과 5개 상자·폐기 봉투 안내를 크게 표시한다', async () => {
+test('상단에 새 분류 원칙과 4개 상자·폐기 봉투 안내를 크게 표시한다', async () => {
   const html = await source('index.html');
   const css = await source('styles.css');
-  assert.match(html, /⚠️ 어딘가 없음/);
-  assert.match(html, /✅ 어딘가 있음/);
-  assert.match(html, /5개 상자/);
+  for (const text of ['✨ 상태 좋음', '💰 대전 판매', '📚 내용 좋음', '📤 스캔', '❤️ 소장 원함', '🏠 서울 보관', '🚫 필요 없음', '♻️ 폐기']) {
+    assert.match(html, new RegExp(text));
+  }
+  assert.match(html, /4개 상자/);
   assert.match(html, /폐기 봉투/);
   assert.match(css, /\.sorting-flow h2[^}]*font-size:\s*clamp\(28px/);
   assert.match(css, /\.sorting-branch h3[^}]*font-size:\s*clamp\(24px/);
@@ -65,7 +66,7 @@ test('실물 상태와 최종 목적지는 한 번에 보이는 라디오 버튼
     assert.doesNotMatch(html, new RegExp(`<select[^>]+name=["']${name}["']`));
     assert.match(html, new RegExp(`type=["']radio["'][^>]+name=["']${name}["']`));
   }
-  for (const label of ['❔ 상태 확인 필요', '🏠 서울 보관 · 자주 볼 책', '🏡 대전 보관 · 장기 보관', '📤 스캔 보내기', '💰 판매 중 · 상태 좋음', '🎁 기증', '♻️ 폐기']) {
+  for (const label of ['❔ 상태 확인 필요', '❤️ 소장 원함 → 🏠 서울 보관', '📚 내용 좋음 → 📤 스캔', '✨ 상태 좋음 → 💰 대전 판매', '🎁 기증', '🚫 필요 없음 → ♻️ 폐기']) {
     assert.match(html, new RegExp(label));
   }
 });
@@ -87,10 +88,10 @@ test('스캔 완료 버튼은 PDF 있음과 폐기로 동시에 전환한다', a
 test('책장 필터와 상단 요약은 새 실물 목적지만 보여준다', async () => {
   const html = await source('index.html');
   const app = await source('src/app.js');
-  for (const option of ['❔ 상태 확인 필요', '🏠 서울 보관', '🏡 대전 보관', '📤 스캔 보내기', '💰 판매 중', '🎁 기증', '♻️ 폐기']) {
+  for (const option of ['❔ 상태 확인 필요', '🏠 서울 보관', '📤 스캔', '💰 대전 판매', '🎁 기증', '♻️ 폐기']) {
     assert.match(html, new RegExp(`<option[^>]*>${option}</option>`));
   }
-  for (const label of ['📚 실물책', '❔ 확인 필요', '🏠 서울', '🏡 대전', '📤 스캔', '💰 판매', '🎁 기증', '♻️ 폐기']) {
+  for (const label of ['📚 실물책', '❔ 확인 필요', '🏠 서울', '📤 스캔', '💰 대전 판매', '🎁 기증', '♻️ 폐기']) {
     assert.match(app, new RegExp(`summaryItem\\('${label}'`));
   }
 });
@@ -98,12 +99,12 @@ test('책장 필터와 상단 요약은 새 실물 목적지만 보여준다', a
 test('새 화면과 이전 CSS가 섞이지 않도록 정적 파일 버전을 고정한다', async () => {
   const html = await source('index.html');
   const worker = await source('sw.js');
-  assert.match(html, /styles\.css\?v=0\.4\.16/);
-  assert.match(html, /src\/app\.js\?v=0\.4\.16/);
-  assert.match(worker, /styles\.css\?v=0\.4\.16/);
-  assert.match(worker, /src\/app\.js\?v=0\.4\.16/);
+  assert.match(html, /styles\.css\?v=0\.4\.17/);
+  assert.match(html, /src\/app\.js\?v=0\.4\.17/);
+  assert.match(worker, /styles\.css\?v=0\.4\.17/);
+  assert.match(worker, /src\/app\.js\?v=0\.4\.17/);
   assert.match(worker, /src\/pdf-catalog\.js/);
-  assert.match(worker, /book-galpi-v22/);
+  assert.match(worker, /book-galpi-v23/);
 });
 
 test('바코드 폴리필 자산을 앱 자체에서 불러온다', async () => {

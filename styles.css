@@ -41,6 +41,11 @@ h1 em { color: var(--forest); font-style: italic; }
 .sorting-branch h3 { margin: 0 0 12px; font-size: clamp(24px, 3vw, 34px); }
 .sorting-branch p { margin: 0 0 10px; font-size: clamp(18px, 2vw, 24px); font-weight: 800; line-height: 1.6; }
 .sorting-branch strong { display: block; color: #ffe1b3; font-size: clamp(16px, 1.6vw, 20px); line-height: 1.55; }
+.sorting-rules { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.sorting-rules li { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 9px; padding: 12px; background: rgba(255,255,255,.08); border-radius: 10px; font-size: clamp(16px, 1.8vw, 21px); line-height: 1.35; }
+.sorting-rules strong { color: var(--white); font-size: inherit; }
+.sorting-rules b { color: #ffe1b3; }
+.sorting-rules span { color: #f3c891; font-weight: 900; }
 .box-plan { margin: 20px 0 0; padding: 17px 20px; background: #fff4d6; border-radius: 12px; color: #4d351c; font-size: clamp(18px, 2vw, 24px); font-weight: 700; }
 .workspace { display: grid; grid-template-columns: minmax(370px, 480px) minmax(0, 1fr); gap: 42px; padding: 42px 0 80px; align-items: start; }
 .panel { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }

@@ -11,9 +11,10 @@ export function recommendDisposition(book = {}) {
   const hasAlternative = Boolean(book.duplicateInSeoul || book.pdfOwned || book.millieStatus === 'full');
   if (book.condition === 'unknown') return 'review';
   if (hasAlternative) return book.condition === 'worn' ? 'recycle' : 'sell';
-  if (book.nextTwoYears === 'yes' || book.frequentReference) return 'keep_seoul';
-  if (book.favorite || book.rare || book.professional || book.annotated) return 'keep_daejeon';
-  if (book.condition === 'worn') return 'scan_pending';
+  if (book.favorite || book.nextTwoYears === 'yes' || book.frequentReference) return 'keep_seoul';
+  if (book.rare || book.professional || book.annotated || book.referenceBook) return 'scan_pending';
+  if (book.condition === 'good') return 'sell';
+  if (book.condition === 'worn' || book.nextTwoYears === 'no') return 'recycle';
   return 'review';
 }
 
@@ -24,12 +25,11 @@ export function normalizeIsbn(value = '') {
 
 export const dispositionLabels = {
   review: '❔ 상태 확인 필요',
-  keep_seoul: '🏠 서울 보관 · 자주 볼 책',
-  keep_daejeon: '🏡 대전 보관 · 장기 보관',
-  scan_pending: '📤 스캔 보내기',
-  sell: '💰 판매 중 · 상태 좋음',
+  keep_seoul: '🏠 서울 보관 · 소장 원함',
+  scan_pending: '📤 스캔 · 내용 좋음',
+  sell: '💰 대전 판매 · 상태 좋음',
   donate: '🎁 기증',
-  recycle: '♻️ 폐기',
+  recycle: '♻️ 폐기 · 필요 없음',
 };
 
 function migrateDisposition(value, condition = 'unknown') {
@@ -37,7 +37,8 @@ function migrateDisposition(value, condition = 'unknown') {
     undecided: 'review',
     defer: 'review',
     seoul: 'keep_seoul',
-    keep: 'keep_daejeon',
+    keep: 'review',
+    keep_daejeon: 'review',
     scan: 'scan_pending',
     duplicate: condition === 'worn' ? 'recycle' : 'donate',
     millie: condition === 'worn' ? 'recycle' : 'donate',

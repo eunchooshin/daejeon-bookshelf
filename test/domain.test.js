@@ -21,10 +21,10 @@ test('대체 자료가 없고 자주 볼 책은 서울 보관을 권한다', () 
   assert.equal(recommendDisposition({ condition: 'good', frequentReference: true }), 'keep_seoul');
 });
 
-test('대체 자료가 없고 장기 보관 가치가 있는 책은 대전 보관을 권한다', () => {
-  assert.equal(recommendDisposition({ condition: 'good', rare: true }), 'keep_daejeon');
-  assert.equal(recommendDisposition({ condition: 'good', professional: true }), 'keep_daejeon');
-  assert.equal(recommendDisposition({ condition: 'good', annotated: true }), 'keep_daejeon');
+test('대체 자료가 없고 내용 가치가 있는 책은 스캔을 권한다', () => {
+  assert.equal(recommendDisposition({ condition: 'good', rare: true }), 'scan_pending');
+  assert.equal(recommendDisposition({ condition: 'good', professional: true }), 'scan_pending');
+  assert.equal(recommendDisposition({ condition: 'good', annotated: true }), 'scan_pending');
 });
 
 test('PDF·밀리·실물 중복은 상태가 좋으면 판매, 훼손되면 폐기를 권한다', () => {
@@ -39,8 +39,9 @@ test('상태를 확인하지 않은 책은 상태 확인 필요로 둔다', () =
   assert.equal(createBook({ title: '미정 책' }).disposition, 'review');
 });
 
-test('대체 자료가 없는 훼손 책은 먼저 스캔 보내기를 권한다', () => {
-  assert.equal(recommendDisposition({ condition: 'worn', nextTwoYears: 'no' }), 'scan_pending');
+test('대체 자료가 없고 필요 없는 책은 폐기하되 내용이 좋으면 스캔을 권한다', () => {
+  assert.equal(recommendDisposition({ condition: 'worn', nextTwoYears: 'no' }), 'recycle');
+  assert.equal(recommendDisposition({ condition: 'worn', referenceBook: true }), 'scan_pending');
 });
 
 test('상태가 좋지 않은 책을 판매로 강제 지정하지 못한다', () => {
@@ -54,10 +55,10 @@ test('ISBN에서 하이픈과 공백을 제거하고 유효 길이만 허용한�
 });
 
 test('CSV 내보내기는 쉼표와 따옴표를 안전하게 이스케이프한다', () => {
-  const csv = booksToCsv([{ title: '책, 하나', author: '김"추츄', disposition: 'keep_daejeon' }]);
+  const csv = booksToCsv([{ title: '책, 하나', author: '김"추츄', disposition: 'keep_seoul' }]);
   assert.match(csv, /"책, 하나"/);
   assert.match(csv, /"김""추츄"/);
-  assert.match(csv, /대전 보관/);
+  assert.match(csv, /서울 보관/);
 });
 
 test('검수된 제목은 자동으로 밀리·PDF 대체 상태를 붙인다', () => {
@@ -102,10 +103,10 @@ test('대체 자료가 없으면 명확히 없음으로 반환한다', () => {
 });
 
 test('실물 목적지 드롭다운에는 새 원칙의 이모지 라벨만 제공한다', () => {
-  assert.deepEqual(Object.keys(dispositionLabels), ['review', 'keep_seoul', 'keep_daejeon', 'scan_pending', 'sell', 'donate', 'recycle']);
-  assert.equal(dispositionLabels.sell, '💰 판매 중 · 상태 좋음');
+  assert.deepEqual(Object.keys(dispositionLabels), ['review', 'keep_seoul', 'scan_pending', 'sell', 'donate', 'recycle']);
+  assert.equal(dispositionLabels.sell, '💰 대전 판매 · 상태 좋음');
   assert.equal(dispositionLabels.donate, '🎁 기증');
-  assert.equal(dispositionLabels.recycle, '♻️ 폐기');
+  assert.equal(dispositionLabels.recycle, '♻️ 폐기 · 필요 없음');
 });
 
 test('책장은 추가와 수정 시 기존 순서를 안전하게 유지한다', () => {
@@ -121,7 +122,7 @@ test('책장에서 지정한 책만 삭제한다', () => {
 
 test('제목 검색과 실물 목적지 필터를 함께 적용한다', () => {
   const books = [
-    { title: '영어 공부', author: '추츄', disposition: 'keep_daejeon' },
+    { title: '영어 공부', author: '추츄', disposition: 'keep_seoul' },
     { title: '개발 공부', author: '슈퍼할미', disposition: 'scan_pending' },
   ];
   assert.equal(filterBooks(books, { query: '개발', disposition: 'scan_pending' }).length, 1);
@@ -132,7 +133,7 @@ test('실물책이 정리 상자나 폐기로 이동하는 목적지만 외부 �
   for (const disposition of ['scan_pending', 'sell', 'donate', 'recycle']) {
     assert.equal(isOutbound({ disposition }), true);
   }
-  for (const disposition of ['review', 'keep_seoul', 'keep_daejeon']) {
+  for (const disposition of ['review', 'keep_seoul']) {
     assert.equal(isOutbound({ disposition }), false);
   }
 });
