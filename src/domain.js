@@ -1,8 +1,10 @@
 import {
   applyVerifiedMillieStatus,
+  isVerifiedMillieTitle,
   MILLIE_VERIFIED_TITLES,
   normalizeBookTitle,
 } from './millie-catalog.js';
+import { millieCoverForTitle } from './millie-covers.js';
 
 export function recommendDisposition(book = {}) {
   if (book.duplicateInSeoul) return 'duplicate';
@@ -21,17 +23,17 @@ export function normalizeIsbn(value = '') {
 }
 
 export const dispositionLabels = {
-  undecided: '미결정',
-  seoul: '서울행',
-  keep: '대체 불가 보관',
-  read_archive: '온라인 읽은 책',
-  duplicate: '중복 정리',
-  defer: '보류 상자',
-  scan: '자가 스캔',
-  millie: '밀리로 대체',
-  sell: '중고 판매',
-  donate: '기증',
-  recycle: '폐기',
+  undecided: '❔ 미결정',
+  seoul: '🚚 서울행',
+  keep: '🔐 대체 불가 보관',
+  read_archive: '📚 온라인 읽은 책',
+  duplicate: '👯 중복 정리',
+  defer: '📦 보류 상자',
+  scan: '📄 자가 스캔',
+  millie: '📱 밀리로 대체',
+  sell: '💰 중고 판매',
+  donate: '🎁 기증',
+  recycle: '♻️ 폐기',
 };
 
 function csvCell(value) {
@@ -95,7 +97,16 @@ export function createBook(input = {}) {
 }
 
 export function mergeVerifiedMillieCatalog(books = [], createdAt = new Date().toISOString()) {
-  const merged = books.map((book) => createBook(book));
+  const merged = books.map((book) => {
+    const normalized = createBook(book);
+    if (!isVerifiedMillieTitle(normalized.title)) return normalized;
+    return {
+      ...normalized,
+      coverUrl: normalized.coverUrl || millieCoverForTitle(normalized.title),
+      millieStatus: 'full',
+      disposition: 'millie',
+    };
+  });
   const existingTitles = new Set(merged.map((book) => normalizeBookTitle(book.title)));
 
   MILLIE_VERIFIED_TITLES.forEach((title, index) => {
@@ -104,7 +115,9 @@ export function mergeVerifiedMillieCatalog(books = [], createdAt = new Date().to
     merged.push(createBook({
       id: `millie-verified-${String(index + 1).padStart(3, '0')}`,
       title,
+      coverUrl: millieCoverForTitle(title),
       millieStatus: 'full',
+      disposition: 'millie',
       source: 'cls-millie-catalog-2026-10-08',
       createdAt,
     }));

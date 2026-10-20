@@ -7,7 +7,7 @@
   <meta name="description" content="대전 집 책 정리를 위한 개인용 책장과 보관·스캔·기증 결정 도우미">
   <title>책갈피 — 대전 책 정리</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=0.4.8">
+  <link rel="stylesheet" href="styles.css?v=0.4.9">
 </head>
 <body>
   <header class="topbar">
@@ -98,7 +98,7 @@
 
             <fieldset id="millie-status" class="choice-field">
               <legend>밀리의 서재</legend>
-              <p class="sync-note">📚 옵시디언에서 검수한 밀리 보유 도서 121권을 내 책장에 자동으로 넣었고 📱 완전판 있음으로 표시합니다.</p>
+              <p class="sync-note">📚 노션 표지를 붙인 밀리 보유 도서 121권을 내 책장에 넣고 📱 밀리로 대체로 설정합니다.</p>
               <div class="choice-grid choice-grid-two">
                 <label><input type="radio" name="millieStatus" value="unchecked" checked><span>⏳ 확인 전</span></label>
                 <label><input type="radio" name="millieStatus" value="full"><span>📱 완전판 있음</span></label>
@@ -165,7 +165,7 @@
         <div class="toolbar">
           <label class="search-box"><span class="sr-only">책 검색</span><input id="search" type="search" placeholder="제목, 저자, ISBN, 박스 검색"></label>
           <select id="disposition-filter" aria-label="정리 결정 필터">
-            <option value="all">모든 결정</option><option value="seoul">서울행</option><option value="keep">대체 불가 보관</option><option value="read_archive">나의 읽은 책</option><option value="duplicate">중복 정리</option><option value="sell">중고 판매</option><option value="donate">기증</option><option value="defer">보류 상자</option><option value="millie">밀리로 대체</option><option value="scan">자가 스캔</option><option value="recycle">폐기</option>
+            <option value="all">🗂️ 모든 결정</option><option value="seoul">🚚 서울행</option><option value="keep">🔐 대체 불가 보관</option><option value="read_archive">📚 온라인 읽은 책</option><option value="duplicate">👯 중복 정리</option><option value="sell">💰 중고 판매</option><option value="donate">🎁 기증</option><option value="defer">📦 보류 상자</option><option value="millie">📱 밀리로 대체</option><option value="scan">📄 자가 스캔</option><option value="recycle">♻️ 폐기</option>
           </select>
         </div>
 
@@ -195,6 +195,6 @@
     window.BookBarcodeDetectorPolyfill = barcodeDetectorPolyfill.BarcodeDetectorPolyfill;
     window.BookBarcodeDetector = window.BarcodeDetector || window.BookBarcodeDetectorPolyfill;
   </script>
-  <script type="module" src="src/app.js?v=0.4.8"></script>
+  <script type="module" src="src/app.js?v=0.4.9"></script>
 </body>
 </html>

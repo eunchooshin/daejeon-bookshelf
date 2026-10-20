@@ -27,7 +27,7 @@ import { isVerifiedMillieTitle } from './millie-catalog.js';
 
 const STORAGE_KEY = 'daejeon-bookshelf.v1';
 const MILLIE_IMPORT_KEY = 'daejeon-bookshelf.millie-catalog-2026-10-08';
-const MILLIE_IMPORT_VERSION = 'cls-121-v2';
+const MILLIE_IMPORT_VERSION = 'cls-121-v3';
 const millieLabels = { unchecked: '밀리 확인 전', full: '📱 밀리에도 있음', partial: '밀리 일부·요약', not_found: '밀리 없음' };
 const $ = (selector) => document.querySelector(selector);
 

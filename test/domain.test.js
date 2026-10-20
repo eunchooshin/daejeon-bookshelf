@@ -13,6 +13,7 @@ import {
   buildBackup,
   parseBackup,
   mergeVerifiedMillieCatalog,
+  dispositionLabels,
 } from '../src/domain.js';
 
 test('1~2년 안에 확실히 읽거나 자주 참고할 책은 서울행을 권한다', () => {
@@ -81,13 +82,31 @@ test('검수된 제목의 책은 기존 수동 선택을 해치지 않고 밀리
 });
 
 test('검수된 밀리 도서 121권을 내 책장에 중복 없이 추가한다', () => {
-  const existing = createBook({ id: 'manual', title: '세이노의 가르침', millieStatus: 'not_found' });
+  const existing = createBook({ id: 'manual', title: '세이노의 가르침', millieStatus: 'not_found', disposition: 'keep', notes: '기존 메모' });
   const imported = mergeVerifiedMillieCatalog([existing], '2026-10-20T00:00:00.000Z');
   assert.equal(imported.length, 121);
-  assert.equal(imported.find((book) => book.id === 'manual').millieStatus, 'not_found');
+  assert.equal(imported.find((book) => book.id === 'manual').millieStatus, 'full');
+  assert.equal(imported.find((book) => book.id === 'manual').disposition, 'millie');
+  assert.equal(imported.find((book) => book.id === 'manual').notes, '기존 메모');
   assert.equal(imported.find((book) => book.title === '습관의 힘').millieStatus, 'full');
+  assert.equal(imported.find((book) => book.title === '습관의 힘').disposition, 'millie');
+  assert.match(imported.find((book) => book.title === '습관의 힘').coverUrl, /^assets\/covers\/millie\//);
   assert.equal(imported.find((book) => book.title === '습관의 힘').source, 'cls-millie-catalog-2026-10-08');
   assert.equal(mergeVerifiedMillieCatalog(imported).length, 121);
+});
+
+test('기존 책의 사용자 표지는 보존하고 빈 표지만 노션 그림으로 채운다', () => {
+  const custom = createBook({ id: 'custom', title: '세이노의 가르침', coverUrl: 'https://example.com/custom.jpg' });
+  const blank = createBook({ id: 'blank', title: '습관의 힘' });
+  const merged = mergeVerifiedMillieCatalog([custom, blank]);
+  assert.equal(merged.find((book) => book.id === 'custom').coverUrl, 'https://example.com/custom.jpg');
+  assert.match(merged.find((book) => book.id === 'blank').coverUrl, /^assets\/covers\/millie\//);
+});
+
+test('책 카드 드롭다운에 정리 결정 이모지가 포함된다', () => {
+  assert.equal(dispositionLabels.millie, '📱 밀리로 대체');
+  assert.equal(dispositionLabels.keep, '🔐 대체 불가 보관');
+  assert.equal(dispositionLabels.sell, '💰 중고 판매');
 });
 
 test('책장은 추가와 수정 시 기존 순서를 안전하게 유지한다', () => {

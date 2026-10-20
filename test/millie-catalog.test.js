@@ -6,6 +6,7 @@ import {
   isVerifiedMillieTitle,
   applyVerifiedMillieStatus,
 } from '../src/millie-catalog.js';
+import { MILLIE_COVER_BY_TITLE, millieCoverForTitle } from '../src/millie-covers.js';
 
 test('옵시디언 검수 목록은 중복을 제거한 121권이다', () => {
   assert.equal(MILLIE_VERIFIED_TITLES.length, 121);
@@ -25,4 +26,10 @@ test('확인 전인 책만 검수 목록과 일치하면 밀리 완전판으로 
   assert.equal(applyVerifiedMillieStatus({ title: '세이노의 가르침', millieStatus: 'unchecked' }), 'full');
   assert.equal(applyVerifiedMillieStatus({ title: '세이노의 가르침', millieStatus: 'not_found' }), 'not_found');
   assert.equal(applyVerifiedMillieStatus({ title: '목록에 없는 책', millieStatus: 'unchecked' }), 'unchecked');
+});
+
+test('노션에서 가져온 121권의 표지를 제목으로 찾는다', () => {
+  assert.equal(Object.keys(MILLIE_COVER_BY_TITLE).length, 121);
+  assert.match(millieCoverForTitle('  습관의   힘 '), /^assets\/covers\/millie\//);
+  assert.match(millieCoverForTitle('사회심리학'), /^assets\/covers\/millie\//);
 });
