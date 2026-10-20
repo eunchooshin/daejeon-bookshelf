@@ -630,11 +630,14 @@ elements.form.addEventListener('submit', (event) => {
 
 $('#lookup-isbn').addEventListener('click', lookupIsbn);
 $('#scan-isbn').addEventListener('click', startScanner);
-$('#barcode-photo').addEventListener('change', async (event) => {
-  const [file] = event.target.files;
-  if (file) await scanBarcodePhoto(file);
-  event.target.value = '';
-});
+for (const inputId of ['barcode-photo', 'barcode-camera-photo', 'scanner-photo', 'scanner-camera-photo']) {
+  $(`#${inputId}`).addEventListener('change', async (event) => {
+    const [file] = event.target.files;
+    if (inputId.startsWith('scanner-')) stopScanner();
+    if (file) await scanBarcodePhoto(file);
+    event.target.value = '';
+  });
+}
 $('#search-millie').addEventListener('click', searchMillie);
 $('#title').addEventListener('change', syncVerifiedMillieChoice);
 $('#close-scanner').addEventListener('click', stopScanner);
