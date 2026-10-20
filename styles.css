@@ -49,6 +49,12 @@ input:focus, select:focus, textarea:focus { border-color: var(--forest); box-sha
 .input-actions { display: grid; grid-template-columns: 1fr auto auto; gap: 7px; }
 .field small { color: var(--muted); line-height: 1.4; }
 .two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cover-preview { display: flex; align-items: center; gap: 14px; margin: 2px 0 18px; padding: 12px; background: #eef2ec; border: 1px solid #c8d5ca; border-radius: 10px; }
+.cover-preview[hidden] { display: none; }
+.cover-preview img { width: 82px; height: 116px; flex: 0 0 auto; object-fit: cover; background: var(--paper-deep); border-radius: 4px 8px 8px 4px; box-shadow: 3px 4px 0 rgba(52,82,67,.12); }
+.cover-preview div { display: grid; gap: 7px; min-width: 0; }
+.cover-preview strong { color: var(--forest-dark); font: 700 17px Georgia, "Batang", serif; line-height: 1.35; }
+.cover-preview small { color: var(--muted); line-height: 1.45; }
 fieldset { margin: 4px 0 18px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; }
 legend { padding: 0 6px; }
 .checks { display: flex; flex-wrap: wrap; gap: 8px; }

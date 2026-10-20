@@ -11,6 +11,21 @@ test('앱 화면은 등록 폼, 검색, 책장, 데이터 백업 기능을 제�
   }
 });
 
+test('책을 찾으면 저장 전에도 표지 미리보기를 보여준다', async () => {
+  const html = await readFile(new URL('index.html', root), 'utf8');
+  const app = await readFile(new URL('src/app.js', root), 'utf8');
+  assert.match(html, /id=["']cover-preview["']/);
+  assert.match(html, /id=["']cover-preview-image["']/);
+  assert.match(app, /renderCoverPreview/);
+});
+
+test('정리 선택지는 빠르게 구분할 수 있는 이모지를 포함한다', async () => {
+  const html = await readFile(new URL('index.html', root), 'utf8');
+  for (const label of ['📌 자주 참고함', '✍️ 메모·필기 있음', '💎 절판·희귀본', '🤔 판단이 안 됨', '✨ 양호', '📱 완전판 있음', '🚚 서울행']) {
+    assert.match(html, new RegExp(label));
+  }
+});
+
 test('바코드 폴리필 자산을 앱 자체에서 불러온다', async () => {
   const html = await readFile(new URL('index.html', root), 'utf8');
   assert.match(html, /vendor\/zbar-wasm\.js/);

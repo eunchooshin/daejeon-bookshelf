@@ -223,6 +223,7 @@ function resetForm() {
   $('#millie-status').value = 'unchecked';
   $('#disposition').value = 'auto';
   draftCoverUrl = '';
+  renderCoverPreview('', '');
   elements.formTitle.textContent = '새 책 등록';
   elements.lookupStatus.textContent = '바코드를 촬영하거나 ISBN을 입력하세요.';
 }
@@ -237,6 +238,7 @@ function editBook(book) {
   }
   $('#disposition').value = book.disposition;
   draftCoverUrl = book.coverUrl || '';
+  renderCoverPreview(book.title, draftCoverUrl);
   elements.formTitle.textContent = '책 정보 수정';
   openForm();
 }
@@ -277,12 +279,31 @@ function lookupJsonp(urlBuilder, isbn, timeoutMs = 8000) {
   });
 }
 
+function renderCoverPreview(title = '', coverUrl = '') {
+  const preview = $('#cover-preview');
+  const image = $('#cover-preview-image');
+  if (!coverUrl) {
+    preview.hidden = true;
+    image.removeAttribute('src');
+    return;
+  }
+  $('#cover-preview-title').textContent = title || '찾은 책 표지';
+  image.alt = `${title || '검색한 책'} 표지`;
+  image.onerror = () => {
+    preview.hidden = true;
+    image.removeAttribute('src');
+  };
+  image.src = coverUrl;
+  preview.hidden = false;
+}
+
 function applyBookMetadata(metadata) {
   if (!metadata) return false;
   $('#title').value = metadata.title || '';
   $('#author').value = metadata.author || '';
   $('#publisher').value = metadata.publisher || '';
   draftCoverUrl = metadata.coverUrl || '';
+  renderCoverPreview(metadata.title, draftCoverUrl);
   return Boolean(metadata.title);
 }
 

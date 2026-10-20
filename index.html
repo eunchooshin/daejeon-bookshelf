@@ -57,30 +57,35 @@
             <div class="field"><label for="publisher">출판사</label><input id="publisher" name="publisher" placeholder="출판사"></div>
           </div>
 
+          <div id="cover-preview" class="cover-preview" hidden aria-live="polite">
+            <img id="cover-preview-image" alt="검색한 책 표지">
+            <div><strong id="cover-preview-title">표지 미리보기</strong><small>저장하기 전 확인할 수 있어요.</small></div>
+          </div>
+
           <fieldset>
-            <legend>현실적인 정리 기준</legend>
+            <legend>🧭 현실적인 정리 기준</legend>
             <div class="checks">
-              <label><input type="checkbox" name="frequentReference"> 자주 참고함</label>
-              <label><input type="checkbox" name="annotated"> 메모·필기 있음</label>
-              <label><input type="checkbox" name="rare"> 절판·희귀본</label>
-              <label><input type="checkbox" name="professional"> 전문자료</label>
-              <label><input type="checkbox" name="duplicateInSeoul"> 서울에 같은 책 있음</label>
-              <label><input type="checkbox" name="easyToReplace"> 다시 구하기 쉬움</label>
-              <label><input type="checkbox" name="alreadyRead"> 이미 읽음</label>
-              <label><input type="checkbox" name="referenceBook"> 참고용 책</label>
-              <label><input type="checkbox" name="favorite"> 애장본</label>
-              <label><input type="checkbox" name="resaleValue"> 중고 가치</label>
+              <label><input type="checkbox" name="frequentReference"> 📌 자주 참고함</label>
+              <label><input type="checkbox" name="annotated"> ✍️ 메모·필기 있음</label>
+              <label><input type="checkbox" name="rare"> 💎 절판·희귀본</label>
+              <label><input type="checkbox" name="professional"> 🧠 전문자료</label>
+              <label><input type="checkbox" name="duplicateInSeoul"> 🏠 서울에 같은 책 있음</label>
+              <label><input type="checkbox" name="easyToReplace"> 🔄 다시 구하기 쉬움</label>
+              <label><input type="checkbox" name="alreadyRead"> ✅ 이미 읽음</label>
+              <label><input type="checkbox" name="referenceBook"> 📖 참고용 책</label>
+              <label><input type="checkbox" name="favorite"> ❤️ 애장본</label>
+              <label><input type="checkbox" name="resaleValue"> 💰 중고 가치</label>
             </div>
           </fieldset>
 
           <div class="two-columns">
             <div class="field">
               <label for="next-two-years">1~2년 안에 읽거나 참고할까?</label>
-              <select id="next-two-years" name="nextTwoYears"><option value="yes">확실히 그럴 것</option><option value="unsure" selected>판단이 안 됨</option><option value="no">그럴 가능성 낮음</option></select>
+              <select id="next-two-years" name="nextTwoYears"><option value="yes">🎯 확실히 그럴 것</option><option value="unsure" selected>🤔 판단이 안 됨</option><option value="no">💤 그럴 가능성 낮음</option></select>
             </div>
             <div class="field">
               <label for="condition">책 상태</label>
-              <select id="condition" name="condition"><option value="good">양호</option><option value="worn">훼손·오염</option></select>
+              <select id="condition" name="condition"><option value="good">✨ 양호</option><option value="worn">🩹 훼손·오염</option></select>
             </div>
           </div>
 
@@ -88,14 +93,14 @@
             <div class="field">
               <label for="millie-status">밀리의 서재</label>
               <select id="millie-status" name="millieStatus">
-                <option value="unchecked">확인 전</option><option value="full">완전판 있음</option><option value="partial">일부·요약만</option><option value="not_found">없음</option>
+                <option value="unchecked">⏳ 확인 전</option><option value="full">📱 완전판 있음</option><option value="partial">📄 일부·요약만</option><option value="not_found">🚫 없음</option>
               </select>
             </div>
             <button id="search-millie" class="button text-button" type="button">공식 검색으로 확인 ↗</button>
           </div>
 
           <div class="two-columns">
-            <div class="field"><label for="disposition">최종 결정</label><select id="disposition" name="disposition"><option value="auto">자동 추천</option><option value="seoul">서울행</option><option value="keep">대체 불가 보관</option><option value="read_archive">온라인 읽은 책</option><option value="duplicate">중복 정리</option><option value="sell">중고 판매</option><option value="donate">기증</option><option value="defer">보류 상자</option><option value="millie">밀리로 대체</option><option value="scan">자가 스캔</option><option value="recycle">폐기</option></select></div>
+            <div class="field"><label for="disposition">최종 결정</label><select id="disposition" name="disposition"><option value="auto">✨ 자동 추천</option><option value="seoul">🚚 서울행</option><option value="keep">🔐 대체 불가 보관</option><option value="read_archive">📚 온라인 읽은 책</option><option value="duplicate">👯 중복 정리</option><option value="sell">💰 중고 판매</option><option value="donate">🎁 기증</option><option value="defer">📦 보류 상자</option><option value="millie">📱 밀리로 대체</option><option value="scan">📄 자가 스캔</option><option value="recycle">♻️ 폐기</option></select></div>
             <div class="field"><label for="box">박스·위치</label><input id="box" name="box" placeholder="예: 박스 A-3"></div>
           </div>
           <div class="field"><label for="notes">메모</label><textarea id="notes" name="notes" rows="3" placeholder="필기 위치, 다시 볼 이유 등"></textarea></div>
