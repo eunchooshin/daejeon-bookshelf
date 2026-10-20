@@ -104,7 +104,7 @@ test('대체 자료가 없으면 명확히 없음으로 반환한다', () => {
 
 test('실물 목적지 드롭다운에는 새 원칙의 이모지 라벨만 제공한다', () => {
   assert.deepEqual(Object.keys(dispositionLabels), ['review', 'keep_seoul', 'scan_pending', 'sell', 'donate', 'recycle']);
-  assert.equal(dispositionLabels.sell, '💰 대전 판매 · 상태 좋음');
+  assert.equal(dispositionLabels.sell, '💰🎁 대전 판매/기증 · 상태 좋음');
   assert.equal(dispositionLabels.donate, '🎁 기증');
   assert.equal(dispositionLabels.recycle, '♻️ 폐기 · 필요 없음');
 });

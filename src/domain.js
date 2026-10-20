@@ -27,7 +27,7 @@ export const dispositionLabels = {
   review: '❔ 상태 확인 필요',
   keep_seoul: '🏠 서울 보관 · 소장 원함',
   scan_pending: '📤 스캔 · 내용 좋음',
-  sell: '💰 대전 판매 · 상태 좋음',
+  sell: '💰🎁 대전 판매/기증 · 상태 좋음',
   donate: '🎁 기증',
   recycle: '♻️ 폐기 · 필요 없음',
 };

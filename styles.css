@@ -80,6 +80,14 @@ input:focus, select:focus, textarea:focus { border-color: var(--forest); box-sha
 .tag.pdf { color: #214c72; background: #dcecff; }
 .tag.duplicate { color: #5a3e75; background: #eee2f7; }
 .tag.no-alternative { color: #7a3c20; background: #ffead6; }
+.compact-rules { margin: -10px 0 20px; padding: 14px; background: #f7f2e8; border: 1px solid var(--line); border-radius: 12px; }
+.compact-rules[hidden] { display: none; }
+.compact-rules h3 { margin: 0 0 10px; font-size: 16px; }
+.compact-rules ul { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }
+.compact-rules li { display: grid; grid-template-columns: 1fr auto 1.25fr; align-items: center; gap: 7px; padding: 9px 10px; background: var(--white); border-radius: 8px; font-size: 13px; line-height: 1.35; }
+.compact-rules li b { color: var(--forest-dark); }
+.compact-rules li span { color: var(--ochre); font-weight: 900; }
+.compact-rules > p { margin: 10px 0 0; padding-top: 10px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; line-height: 1.45; }
 fieldset { margin: 4px 0 18px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; }
 legend { padding: 0 6px; }
 .checks { display: flex; flex-wrap: wrap; gap: 8px; }

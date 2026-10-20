@@ -49,6 +49,7 @@ const elements = {
   availabilityTitle: $('#availability-title'),
   availabilityBadges: $('#availability-badges'),
   availabilityMessage: $('#availability-message'),
+  noAlternativeRules: $('#no-alternative-rules'),
 };
 
 let books = loadBooks();
@@ -118,7 +119,7 @@ function renderSummary() {
     summaryItem('❔ 확인 필요', books.filter((book) => book.disposition === 'review').length),
     summaryItem('🏠 서울', books.filter((book) => book.disposition === 'keep_seoul').length),
     summaryItem('📤 스캔', books.filter((book) => book.disposition === 'scan_pending').length),
-    summaryItem('💰 대전 판매', books.filter((book) => book.disposition === 'sell').length),
+    summaryItem('💰🎁 대전 판매/기증', books.filter((book) => book.disposition === 'sell').length),
     summaryItem('🎁 기증', books.filter((book) => book.disposition === 'donate').length),
     summaryItem('♻️ 폐기', books.filter((book) => book.disposition === 'recycle').length),
   );
@@ -257,11 +258,13 @@ function renderAvailabilityAlert() {
   const title = $('#title').value.trim();
   if (!title) {
     elements.availabilityAlert.hidden = true;
+    elements.noAlternativeRules.hidden = true;
     return;
   }
   const duplicate = Boolean(elements.form.elements.namedItem('duplicateInSeoul')?.checked);
   const availability = availabilityForTitle(title, books, duplicate);
   elements.availabilityAlert.hidden = false;
+  elements.noAlternativeRules.hidden = availability.any;
   elements.availabilityAlert.classList.toggle('has-alternative', availability.any);
   elements.availabilityAlert.classList.toggle('no-alternative', !availability.any);
   elements.availabilityTitle.textContent = availability.any ? '✅ 대체 자료가 있어요!' : '⚠️ 대체 자료가 없어요';
@@ -273,7 +276,7 @@ function renderAvailabilityAlert() {
   elements.availabilityBadges.replaceChildren(...badges);
   elements.availabilityMessage.textContent = availability.any
     ? '실물책은 상태가 좋으면 판매하고, 안 팔리면 기증하세요. 훼손됐으면 폐기해도 돼요.'
-    : '✨ 상태 좋음 → 💰 대전 판매 · 📚 내용 좋음 → 📤 스캔 · ❤️ 소장 원함 → 🏠 서울 보관 · 🚫 필요 없음 → ♻️ 폐기';
+    : '아래 기준으로 실물책의 목적지를 골라주세요.';
 }
 
 function resetForm() {
