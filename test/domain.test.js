@@ -13,6 +13,7 @@ import {
   parseBackup,
   migratePhysicalBooks,
   availabilityForTitle,
+  buildBookshelfView,
   dispositionLabels,
 } from '../src/domain.js';
 
@@ -100,6 +101,27 @@ test('대체 자료가 없으면 명확히 없음으로 반환한다', () => {
     duplicate: false,
     any: false,
   });
+});
+
+test('대체 자료 카탈로그 187종은 내 책장에 보이고 실물책과 제목으로 합쳐진다', () => {
+  const catalogOnly = buildBookshelfView([]);
+  assert.equal(catalogOnly.length, 187);
+  assert.equal(catalogOnly.every((book) => book.referenceOnly), true);
+
+  const knownPhysical = createBook({ title: '아웃풋 트레이닝', notes: '실물 확인', processedAt: '2026-10-20T12:00:00.000Z' });
+  const merged = buildBookshelfView([knownPhysical]);
+  assert.equal(merged.length, 187);
+  assert.equal(merged[0].title, '아웃풋 트레이닝');
+  assert.equal(merged[0].referenceOnly, false);
+  assert.equal(merged[0].notes, '실물 확인');
+});
+
+test('새로 처리한 실물책은 내 책장 가장 위에 쌓이고 처리일을 보존한다', () => {
+  const processedAt = '2026-10-20T13:14:15.000Z';
+  const view = buildBookshelfView([createBook({ title: '새 실물책', processedAt })]);
+  assert.equal(view.length, 188);
+  assert.equal(view[0].title, '새 실물책');
+  assert.equal(view[0].processedAt, processedAt);
 });
 
 test('실물 목적지 드롭다운에는 새 원칙의 이모지 라벨만 제공한다', () => {

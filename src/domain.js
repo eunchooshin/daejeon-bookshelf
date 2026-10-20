@@ -110,6 +110,7 @@ export function createBook(input = {}) {
     nextTwoYears: 'unsure',
     condition: 'unknown',
     resaleValue: false,
+    processedAt: '',
     createdAt: new Date().toISOString(),
   };
   const book = { ...base, ...input, isbn: normalizeIsbn(input.isbn) };
@@ -200,6 +201,44 @@ export function mergePdfCatalog(books = [], createdAt = new Date().toISOString()
   });
 
   return merged;
+}
+
+export function buildBookshelfView(physicalBooks = []) {
+  const catalog = mergePdfCatalog(mergeVerifiedMillieCatalog([])).map((book) => ({
+    ...book,
+    referenceOnly: true,
+    disposition: 'reference',
+    processedAt: '',
+  }));
+  const byTitle = new Map(catalog.map((book, index) => [normalizeBookTitle(book.title), index]));
+
+  physicalBooks.map((book) => createBook(book)).forEach((physical) => {
+    const key = normalizeBookTitle(physical.title);
+    const existingIndex = byTitle.get(key);
+    if (existingIndex === undefined) {
+      catalog.push({ ...physical, referenceOnly: false });
+      byTitle.set(key, catalog.length - 1);
+      return;
+    }
+    const reference = catalog[existingIndex];
+    catalog[existingIndex] = {
+      ...reference,
+      ...physical,
+      coverUrl: physical.coverUrl || reference.coverUrl,
+      millieStatus: reference.millieStatus === 'full' ? 'full' : physical.millieStatus,
+      pdfOwned: Boolean(reference.pdfOwned || physical.pdfOwned),
+      pdfFileCount: Math.max(reference.pdfFileCount || 0, physical.pdfFileCount || 0),
+      referenceOnly: false,
+    };
+  });
+
+  return catalog.sort((left, right) => {
+    const leftActivity = left.referenceOnly ? '' : (left.processedAt || left.createdAt || '');
+    const rightActivity = right.referenceOnly ? '' : (right.processedAt || right.createdAt || '');
+    if (leftActivity !== rightActivity) return rightActivity.localeCompare(leftActivity);
+    if (left.referenceOnly !== right.referenceOnly) return left.referenceOnly ? 1 : -1;
+    return left.title.localeCompare(right.title, 'ko');
+  });
 }
 
 export function assignDeferredBox(book = {}) {

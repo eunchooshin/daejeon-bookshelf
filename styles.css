@@ -134,9 +134,11 @@ legend { padding: 0 6px; }
 .book-main { min-width: 0; }
 .book-main h3 { margin: 0 0 7px; font: 600 20px Georgia, "Batang", serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .book-meta { color: var(--muted); font-size: 13px; line-height: 1.6; }
+.processed-date { margin-top: 4px; color: var(--ochre); font-size: 12px; font-weight: 800; }
 .book-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .tag { padding: 5px 8px; color: var(--forest-dark); background: #e1e9e2; border-radius: 5px; font-size: 11px; font-weight: 700; }
 .tag.millie { color: #7c461d; background: #f3dfc9; }
+.tag.reference { color: #344f68; background: #e3edf5; }
 .book-actions { display: grid; gap: 7px; justify-items: stretch; }
 .disposition-select { min-width: 130px; }
 .link-button { color: var(--forest); border: 0; background: transparent; text-decoration: underline; text-underline-offset: 3px; }

@@ -4,6 +4,7 @@ import {
   createBook,
   migratePhysicalBooks,
   availabilityForTitle,
+  buildBookshelfView,
   dispositionLabels,
   filterBooks,
   isOutbound,
@@ -113,9 +114,10 @@ function summaryItem(label, value) {
   return item;
 }
 
-function renderSummary() {
+function renderSummary(view) {
   elements.summary.replaceChildren(
-    summaryItem('📚 실물책', books.length),
+    summaryItem('📚 내 책장', view.length),
+    summaryItem('📦 처리한 실물책', books.length),
     summaryItem('❔ 확인 필요', books.filter((book) => book.disposition === 'review').length),
     summaryItem('🏠 서울', books.filter((book) => book.disposition === 'keep_seoul').length),
     summaryItem('📤 스캔', books.filter((book) => book.disposition === 'scan_pending').length),
@@ -152,6 +154,13 @@ function tag(text, className = '') {
   return node;
 }
 
+function formatProcessedDate(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium' }).format(date);
+}
+
 function dispositionSelect(book) {
   const select = document.createElement('select');
   select.className = 'disposition-select';
@@ -164,7 +173,7 @@ function dispositionSelect(book) {
     select.append(option);
   });
   select.addEventListener('change', () => {
-    books = upsertBook(books, { ...book, disposition: select.value });
+    books = upsertBook(books, { ...book, disposition: select.value, processedAt: new Date().toISOString(), referenceOnly: undefined });
     persist();
     render();
     showToast('정리 결정을 바꿨어요.');
@@ -184,9 +193,11 @@ function renderBook(book) {
   const meta = [book.author, book.publisher, book.isbn].filter(Boolean).join(' · ');
   addText(main, 'div', meta || '저자·출판사 정보 없음', 'book-meta');
   if (book.box) addText(main, 'div', `위치: ${book.box}`, 'book-meta');
+  if (book.processedAt) addText(main, 'div', `처리일 · ${formatProcessedDate(book.processedAt)}`, 'processed-date');
   const tags = document.createElement('div');
   tags.className = 'book-tags';
-  tags.append(tag(dispositionLabels[book.disposition] || '❔ 상태 확인 필요'));
+  if (book.referenceOnly) tags.append(tag('📚 대체 자료', 'reference'));
+  else tags.append(tag(dispositionLabels[book.disposition] || '❔ 상태 확인 필요'));
   if (book.millieStatus === 'full') tags.append(tag('📱 밀리에 있음', 'millie'));
   if (book.pdfOwned) tags.append(tag(`📄 PDF 있음${book.pdfFileCount > 1 ? ` · ${book.pdfFileCount}개 파일` : ''}`, 'pdf'));
   if (book.duplicateInSeoul) tags.append(tag('👯 실물책 한 권 더 있음', 'duplicate'));
@@ -199,12 +210,19 @@ function renderBook(book) {
 
   const actions = document.createElement('div');
   actions.className = 'book-actions';
+  if (book.referenceOnly) {
+    const processBook = addText(actions, 'button', '실물책 처리', 'button ghost');
+    processBook.type = 'button';
+    processBook.addEventListener('click', () => processReferenceBook(book));
+    card.append(actions);
+    return card;
+  }
   actions.append(dispositionSelect(book));
   if (book.disposition === 'scan_pending') {
     const completeScan = addText(actions, 'button', '✅ 스캔 완료 → 폐기', 'button scan-complete');
     completeScan.type = 'button';
     completeScan.addEventListener('click', () => {
-      books = upsertBook(books, { ...book, pdfOwned: true, disposition: 'recycle' });
+      books = upsertBook(books, { ...book, pdfOwned: true, disposition: 'recycle', processedAt: new Date().toISOString(), referenceOnly: undefined });
       persist();
       render();
       showToast('📄 PDF 있음으로 기록하고 실물책은 폐기로 옮겼어요.');
@@ -227,13 +245,14 @@ function renderBook(book) {
 }
 
 function render() {
-  renderSummary();
-  const visible = filterBooks(books, { query: elements.search.value, disposition: elements.filter.value });
+  const view = buildBookshelfView(books);
+  renderSummary(view);
+  const visible = filterBooks(view, { query: elements.search.value, disposition: elements.filter.value });
   if (!visible.length) {
     const empty = document.createElement('div');
     empty.className = 'empty';
-    addText(empty, 'h3', books.length ? '조건에 맞는 책이 없어요.' : '아직 등록한 책이 없어요.');
-    addText(empty, 'p', books.length ? '검색어나 필터를 바꿔보세요.' : '첫 책의 ISBN을 입력하거나 카메라로 촬영해보세요.');
+    addText(empty, 'h3', '조건에 맞는 책이 없어요.');
+    addText(empty, 'p', '검색어나 필터를 바꿔보세요.');
     const button = addText(empty, 'button', '첫 책 등록하기', 'button primary');
     button.type = 'button';
     button.addEventListener('click', openForm);
@@ -292,6 +311,19 @@ function resetForm() {
   elements.lookupStatus.textContent = '바코드를 촬영하거나 ISBN을 입력하세요.';
 }
 
+function processReferenceBook(book) {
+  resetForm();
+  for (const key of ['title', 'author', 'isbn', 'publisher']) {
+    const field = elements.form.elements.namedItem(key);
+    if (field) field.value = book[key] || '';
+  }
+  draftCoverUrl = book.coverUrl || '';
+  renderCoverPreview(book.title, draftCoverUrl);
+  renderAvailabilityAlert();
+  elements.formTitle.textContent = '실물책 처리';
+  openForm();
+}
+
 function editBook(book) {
   resetForm();
   for (const [key, value] of Object.entries(book)) {
@@ -317,6 +349,7 @@ function formBook() {
   }
   if (input.disposition === 'auto') delete input.disposition;
   input.coverUrl = draftCoverUrl;
+  input.processedAt = new Date().toISOString();
   const existing = books.find((book) => book.id === input.id);
   if (existing) return createBook({ ...existing, ...input, createdAt: existing.createdAt });
   delete input.id;
