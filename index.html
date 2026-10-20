@@ -7,7 +7,7 @@
   <meta name="description" content="대전 집 책 정리를 위한 개인용 책장과 보관·스캔·기증 결정 도우미">
   <title>책갈피 — 대전 책 정리</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=0.4.15">
+  <link rel="stylesheet" href="styles.css?v=0.4.16">
 </head>
 <body>
   <header class="topbar">
@@ -22,10 +22,27 @@
     <section class="intro" aria-labelledby="intro-title">
       <div>
         <p class="eyebrow">PRIVATE BOOK ORGANIZER</p>
-        <h1 id="intro-title">버릴 책보다,<br><em>남길 이유</em>부터 찾기.</h1>
-        <p>서울·대전 보관, 스캔, 중복·밀리 대체 후 기증·폐기, 상태 좋은 책의 중고 판매까지 한 기준으로 정리하세요.</p>
+        <h1 id="intro-title">실물책을 찾고,<br><em>대체 자료부터</em> 확인하기.</h1>
+        <p>PDF·밀리·중복 실물책이 있는지 먼저 확인하고, 실물책의 최종 목적지를 정하세요.</p>
       </div>
       <div id="summary" class="summary" aria-label="책장 요약"></div>
+    </section>
+
+    <section class="sorting-flow" aria-labelledby="sorting-flow-title">
+      <p class="eyebrow">한눈에 보는 분류 순서</p>
+      <h2 id="sorting-flow-title">📚 대체 자료가 있는지 먼저 확인해요</h2>
+      <div class="sorting-branches">
+        <article class="sorting-branch no-alternative">
+          <h3>⚠️ 어딘가 없음</h3>
+          <p>📤 스캔 보내기　🏠 서울 보관　🏡 대전 보관</p>
+        </article>
+        <article class="sorting-branch has-alternative">
+          <h3>✅ 어딘가 있음</h3>
+          <p>📄 PDF　📱 밀리　👯 실물책 한 권 더</p>
+          <strong>상태 좋음 → 💰 판매　·　안 팔리면 🎁 기증　·　훼손 → ♻️ 폐기</strong>
+        </article>
+      </div>
+      <p class="box-plan">📦 준비: 서울 · 대전 · 스캔 · 판매 · 기증 <strong>5개 상자</strong> + 폐기 봉투</p>
     </section>
 
     <section class="workspace" aria-label="책 정리 작업공간">
@@ -63,6 +80,12 @@
             <div><strong id="cover-preview-title">표지 미리보기</strong><small>저장하기 전 확인할 수 있어요.</small></div>
           </div>
 
+          <section id="availability-alert" class="availability-alert" hidden aria-live="polite">
+            <h3 id="availability-title"></h3>
+            <div id="availability-badges" class="availability-badges"></div>
+            <p id="availability-message"></p>
+          </section>
+
           <fieldset>
             <legend>🧭 현실적인 정리 기준</legend>
             <div class="checks">
@@ -70,7 +93,7 @@
               <label><input type="checkbox" name="annotated"> ✍️ 메모·필기 있음</label>
               <label><input type="checkbox" name="rare"> 💎 절판·희귀본</label>
               <label><input type="checkbox" name="professional"> 🧠 전문자료</label>
-              <label><input type="checkbox" name="duplicateInSeoul"> 🏠 서울에 같은 책 있음</label>
+              <label><input type="checkbox" name="duplicateInSeoul"> 👯 실물책 한 권 더 있음</label>
               <label><input type="checkbox" name="easyToReplace"> 🔄 다시 구하기 쉬움</label>
               <label><input type="checkbox" name="alreadyRead"> ✅ 이미 읽음</label>
               <label><input type="checkbox" name="referenceBook"> 📖 참고용 책</label>
@@ -90,55 +113,37 @@
             </fieldset>
 
             <fieldset id="condition" class="choice-field">
-              <legend>책 상태</legend>
-              <div class="choice-grid choice-grid-two">
-                <label><input type="radio" name="condition" value="good" checked><span>✨ 양호</span></label>
+              <legend>실물책 상태</legend>
+              <div class="choice-grid choice-grid-three">
+                <label><input type="radio" name="condition" value="unknown" checked><span>❔ 확인 필요</span></label>
+                <label><input type="radio" name="condition" value="good"><span>✨ 상태 좋음</span></label>
                 <label><input type="radio" name="condition" value="worn"><span>🩹 훼손·오염</span></label>
               </div>
-            </fieldset>
-
-            <fieldset id="millie-status" class="choice-field">
-              <legend>밀리의 서재</legend>
-              <p class="sync-note">📚 노션 표지를 붙인 밀리 보유 도서 121권을 내 책장에 넣고 📱 밀리로 대체로 설정합니다.</p>
-              <div class="choice-grid choice-grid-two">
-                <label><input type="radio" name="millieStatus" value="unchecked" checked><span>⏳ 확인 전</span></label>
-                <label><input type="radio" name="millieStatus" value="full"><span>📱 완전판 있음</span></label>
-                <label><input type="radio" name="millieStatus" value="partial"><span>📄 일부·요약만</span></label>
-                <label><input type="radio" name="millieStatus" value="not_found"><span>🚫 없음</span></label>
-              </div>
-              <button id="search-millie" class="button text-button" type="button">밀리 공식 검색으로 확인 ↗</button>
             </fieldset>
           </div>
 
           <details class="criteria-guide">
             <summary>🧭 최종 결정 기준 보기</summary>
             <div class="criteria-list">
-              <p><strong>🏠 보관 · 서울</strong><span>앞으로 1~2년 안에 확실히 읽거나 자주 참고할 책</span></p>
-              <p><strong>🏡 보관 · 대전</strong><span>절판·전문자료·필기가 있어 대전에 남길 책</span></p>
-              <p><strong>📄 스캔</strong><span>필요한 내용만 디지털로 남기면 충분한 책</span></p>
-              <p><strong>📄 PDF 소장 → 기증·폐기</strong><span>이미 스캔본을 소장해 실물은 상태에 따라 기증하거나 폐기</span></p>
-              <p><strong>👯 중복 → 기증·폐기</strong><span>상태가 좋으면 기증하고 훼손됐으면 폐기</span></p>
-              <p><strong>📱 밀리 → 기증·폐기</strong><span>밀리로 대체하고 상태가 좋으면 기증, 훼손됐으면 폐기</span></p>
-              <p><strong>💰 중고 판매</strong><span>상태가 좋은 책만 판매</span></p>
-              <p><strong>📦 보류 상자</strong><span>지금 결정하기 어렵다면 보류 상자 1개에만 보관</span></p>
+              <p><strong>⚠️ 대체 자료 없음</strong><span>📤 스캔 보내기 / 자주 볼 책은 🏠 서울 / 장기 보관은 🏡 대전</span></p>
+              <p><strong>✅ 대체 자료 있음</strong><span>📄 PDF · 📱 밀리 · 👯 실물 중복은 동시에 표시</span></p>
+              <p><strong>✨ 상태 좋음</strong><span>💰 판매 중으로 시작하고, 안 팔리면 직접 🎁 기증으로 변경</span></p>
+              <p><strong>🩹 훼손·오염</strong><span>♻️ 폐기</span></p>
+              <p><strong>📤 스캔 완료</strong><span>📄 PDF 있음으로 바뀐 뒤 ♻️ 폐기</span></p>
             </div>
           </details>
 
           <fieldset id="disposition" class="choice-field final-choice-field">
-            <legend>최종 결정</legend>
+            <legend>실물책 최종 목적지</legend>
             <div class="choice-grid choice-grid-two">
-              <label><input type="radio" name="disposition" value="auto" checked><span>✨ 자동 추천</span></label>
-              <label><input type="radio" name="disposition" value="keep_seoul"><span>🏠 보관 · 서울</span></label>
-              <label><input type="radio" name="disposition" value="keep_daejeon"><span>🏡 보관 · 대전</span></label>
-              <label><input type="radio" name="disposition" value="scan"><span>📄 스캔</span></label>
-              <label><input type="radio" name="disposition" value="pdf_donate"><span>📄 PDF 소장 → 🎁 기증</span></label>
-              <label><input type="radio" name="disposition" value="pdf_recycle"><span>📄 PDF 소장 → ♻️ 폐기</span></label>
-              <label><input type="radio" name="disposition" value="duplicate_donate"><span>👯 중복 → 🎁 기증</span></label>
-              <label><input type="radio" name="disposition" value="duplicate_recycle"><span>👯 중복 → ♻️ 폐기</span></label>
-              <label><input type="radio" name="disposition" value="millie_donate"><span>📱 밀리 → 🎁 기증</span></label>
-              <label><input type="radio" name="disposition" value="millie_recycle"><span>📱 밀리 → ♻️ 폐기</span></label>
-              <label><input type="radio" name="disposition" value="sell"><span>💰 중고 판매 · 상태 좋음</span></label>
-              <label><input type="radio" name="disposition" value="defer"><span>📦 보류 상자</span></label>
+              <label><input type="radio" name="disposition" value="auto" checked><span>✨ 원칙대로 자동 추천</span></label>
+              <label><input type="radio" name="disposition" value="review"><span>❔ 상태 확인 필요</span></label>
+              <label><input type="radio" name="disposition" value="keep_seoul"><span>🏠 서울 보관 · 자주 볼 책</span></label>
+              <label><input type="radio" name="disposition" value="keep_daejeon"><span>🏡 대전 보관 · 장기 보관</span></label>
+              <label><input type="radio" name="disposition" value="scan_pending"><span>📤 스캔 보내기</span></label>
+              <label><input type="radio" name="disposition" value="sell"><span>💰 판매 중 · 상태 좋음</span></label>
+              <label><input type="radio" name="disposition" value="donate"><span>🎁 기증</span></label>
+              <label><input type="radio" name="disposition" value="recycle"><span>♻️ 폐기</span></label>
             </div>
           </fieldset>
 
@@ -166,7 +171,7 @@
         <div class="toolbar">
           <label class="search-box"><span class="sr-only">책 검색</span><input id="search" type="search" placeholder="제목, 저자, ISBN, 박스 검색"></label>
           <select id="disposition-filter" aria-label="정리 결정 필터">
-            <option value="all">🗂️ 모든 결정</option><option value="keep_seoul">🏠 보관 · 서울</option><option value="keep_daejeon">🏡 보관 · 대전</option><option value="scan">📄 스캔</option><option value="pdf_donate">📄 PDF 소장 → 🎁 기증</option><option value="pdf_recycle">📄 PDF 소장 → ♻️ 폐기</option><option value="duplicate_donate">👯 중복 → 🎁 기증</option><option value="duplicate_recycle">👯 중복 → ♻️ 폐기</option><option value="millie_donate">📱 밀리 → 🎁 기증</option><option value="millie_recycle">📱 밀리 → ♻️ 폐기</option><option value="sell">💰 중고 판매 · 상태 좋음</option><option value="defer">📦 보류 상자</option>
+            <option value="all">🗂️ 모든 목적지</option><option value="review">❔ 상태 확인 필요</option><option value="keep_seoul">🏠 서울 보관</option><option value="keep_daejeon">🏡 대전 보관</option><option value="scan_pending">📤 스캔 보내기</option><option value="sell">💰 판매 중</option><option value="donate">🎁 기증</option><option value="recycle">♻️ 폐기</option>
           </select>
         </div>
 
@@ -198,6 +203,6 @@
     window.BookBarcodeDetectorPolyfill = barcodeDetectorPolyfill.BarcodeDetectorPolyfill;
     window.BookBarcodeDetector = window.BarcodeDetector || window.BookBarcodeDetectorPolyfill;
   </script>
-  <script type="module" src="src/app.js?v=0.4.15"></script>
+  <script type="module" src="src/app.js?v=0.4.16"></script>
 </body>
 </html>

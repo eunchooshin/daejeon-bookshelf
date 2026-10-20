@@ -2,8 +2,8 @@ import {
   buildBackup,
   booksToCsv,
   createBook,
-  mergePdfCatalog,
-  mergeVerifiedMillieCatalog,
+  migratePhysicalBooks,
+  availabilityForTitle,
   dispositionLabels,
   filterBooks,
   isOutbound,
@@ -28,7 +28,7 @@ import { isVerifiedMillieTitle } from './millie-catalog.js';
 
 const STORAGE_KEY = 'daejeon-bookshelf.v1';
 const MILLIE_IMPORT_KEY = 'daejeon-bookshelf.millie-catalog-2026-10-08';
-const MILLIE_IMPORT_VERSION = 'cls-121-pdf-67-v5';
+const CATALOG_IMPORT_MARKER = 'physical-books-v6';
 const millieLabels = { unchecked: '밀리 확인 전', full: '📱 밀리에도 있음', partial: '밀리 일부·요약', not_found: '밀리 없음' };
 const $ = (selector) => document.querySelector(selector);
 
@@ -45,6 +45,10 @@ const elements = {
   scannerVideo: $('#scanner-video'),
   scannerStatus: $('#scanner-status'),
   toast: $('#toast'),
+  availabilityAlert: $('#availability-alert'),
+  availabilityTitle: $('#availability-title'),
+  availabilityBadges: $('#availability-badges'),
+  availabilityMessage: $('#availability-message'),
 };
 
 let books = loadBooks();
@@ -57,18 +61,17 @@ let torchOn = false;
 function loadBooks() {
   try {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    let loaded = Array.isArray(parsed) ? parsed.map((book) => createBook(book)) : [];
-    if (localStorage.getItem(MILLIE_IMPORT_KEY) !== MILLIE_IMPORT_VERSION) {
-      loaded = mergePdfCatalog(mergeVerifiedMillieCatalog(loaded));
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(loaded));
-      localStorage.setItem(MILLIE_IMPORT_KEY, MILLIE_IMPORT_VERSION);
+    const stored = Array.isArray(parsed) ? parsed : [];
+    const physical = migratePhysicalBooks(stored);
+    if (localStorage.getItem(MILLIE_IMPORT_KEY) !== CATALOG_IMPORT_MARKER || physical.length !== stored.length) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(physical));
+      localStorage.setItem(MILLIE_IMPORT_KEY, CATALOG_IMPORT_MARKER);
     }
-    return loaded;
+    return physical;
   } catch {
-    const loaded = mergePdfCatalog(mergeVerifiedMillieCatalog([]));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(loaded));
-    localStorage.setItem(MILLIE_IMPORT_KEY, MILLIE_IMPORT_VERSION);
-    return loaded;
+    localStorage.setItem(STORAGE_KEY, '[]');
+    localStorage.setItem(MILLIE_IMPORT_KEY, CATALOG_IMPORT_MARKER);
+    return [];
   }
 }
 
@@ -111,15 +114,14 @@ function summaryItem(label, value) {
 
 function renderSummary() {
   elements.summary.replaceChildren(
-    summaryItem('📚 전체', books.length),
-    summaryItem('🏠 서울 보관', books.filter((book) => book.disposition === 'keep_seoul').length),
-    summaryItem('🏡 대전 보관', books.filter((book) => book.disposition === 'keep_daejeon').length),
-    summaryItem('📄 스캔', books.filter((book) => book.disposition === 'scan').length),
-    summaryItem('📄 PDF 소장', books.filter((book) => book.pdfOwned).length),
-    summaryItem('👯 중복 정리', books.filter((book) => book.disposition.startsWith('duplicate_')).length),
-    summaryItem('📱 밀리 대체', books.filter((book) => book.disposition.startsWith('millie_')).length),
-    summaryItem('💰 중고 판매', books.filter((book) => book.disposition === 'sell').length),
-    summaryItem('📦 보류', books.filter((book) => book.disposition === 'defer').length),
+    summaryItem('📚 실물책', books.length),
+    summaryItem('❔ 확인 필요', books.filter((book) => book.disposition === 'review').length),
+    summaryItem('🏠 서울', books.filter((book) => book.disposition === 'keep_seoul').length),
+    summaryItem('🏡 대전', books.filter((book) => book.disposition === 'keep_daejeon').length),
+    summaryItem('📤 스캔', books.filter((book) => book.disposition === 'scan_pending').length),
+    summaryItem('💰 판매', books.filter((book) => book.disposition === 'sell').length),
+    summaryItem('🎁 기증', books.filter((book) => book.disposition === 'donate').length),
+    summaryItem('♻️ 폐기', books.filter((book) => book.disposition === 'recycle').length),
   );
 }
 
@@ -184,9 +186,11 @@ function renderBook(book) {
   if (book.box) addText(main, 'div', `위치: ${book.box}`, 'book-meta');
   const tags = document.createElement('div');
   tags.className = 'book-tags';
-  tags.append(tag(dispositionLabels[book.disposition] || '미결정'));
-  tags.append(tag(millieLabels[book.millieStatus] || millieLabels.unchecked, 'millie'));
-  if (book.pdfOwned) tags.append(tag(`📄 PDF 소장${book.pdfFileCount > 1 ? ` · ${book.pdfFileCount}개 파일` : ''}`, 'pdf'));
+  tags.append(tag(dispositionLabels[book.disposition] || '❔ 상태 확인 필요'));
+  if (book.millieStatus === 'full') tags.append(tag('📱 밀리에 있음', 'millie'));
+  if (book.pdfOwned) tags.append(tag(`📄 PDF 있음${book.pdfFileCount > 1 ? ` · ${book.pdfFileCount}개 파일` : ''}`, 'pdf'));
+  if (book.duplicateInSeoul) tags.append(tag('👯 실물책 한 권 더 있음', 'duplicate'));
+  if (book.millieStatus !== 'full' && !book.pdfOwned && !book.duplicateInSeoul) tags.append(tag('🚫 대체 자료 없음', 'no-alternative'));
   if (book.annotated) tags.append(tag('필기 있음'));
   if (book.rare) tags.append(tag('희귀·절판'));
   if (book.favorite) tags.append(tag('애장본'));
@@ -196,6 +200,16 @@ function renderBook(book) {
   const actions = document.createElement('div');
   actions.className = 'book-actions';
   actions.append(dispositionSelect(book));
+  if (book.disposition === 'scan_pending') {
+    const completeScan = addText(actions, 'button', '✅ 스캔 완료 → 폐기', 'button scan-complete');
+    completeScan.type = 'button';
+    completeScan.addEventListener('click', () => {
+      books = upsertBook(books, { ...book, pdfOwned: true, disposition: 'recycle' });
+      persist();
+      render();
+      showToast('📄 PDF 있음으로 기록하고 실물책은 폐기로 옮겼어요.');
+    });
+  }
   const edit = addText(actions, 'button', '수정', 'link-button');
   edit.type = 'button';
   edit.addEventListener('click', () => editBook(book));
@@ -240,23 +254,38 @@ function setFormChoice(name, value) {
   choices.forEach((choice) => { choice.checked = choice.value === value; });
 }
 
-function syncVerifiedMillieChoice() {
-  const current = elements.form.querySelector('input[name="millieStatus"]:checked')?.value;
-  if (current === 'unchecked' && isVerifiedMillieTitle($('#title').value)) {
-    setFormChoice('millieStatus', 'full');
-    showToast('📱 검수 목록과 일치해 밀리 완전판으로 표시했어요.');
+function renderAvailabilityAlert() {
+  const title = $('#title').value.trim();
+  if (!title) {
+    elements.availabilityAlert.hidden = true;
+    return;
   }
+  const duplicate = Boolean(elements.form.elements.namedItem('duplicateInSeoul')?.checked);
+  const availability = availabilityForTitle(title, books, duplicate);
+  elements.availabilityAlert.hidden = false;
+  elements.availabilityAlert.classList.toggle('has-alternative', availability.any);
+  elements.availabilityAlert.classList.toggle('no-alternative', !availability.any);
+  elements.availabilityTitle.textContent = availability.any ? '✅ 대체 자료가 있어요!' : '⚠️ 대체 자료가 없어요';
+  const badges = [];
+  if (availability.pdf) badges.push(tag('📄 PDF 있음', 'pdf'));
+  if (availability.millie) badges.push(tag('📱 밀리에 있음', 'millie'));
+  if (availability.duplicate) badges.push(tag('👯 실물책 한 권 더 있음', 'duplicate'));
+  if (!availability.any) badges.push(tag('🚫 대체 자료 없음', 'no-alternative'));
+  elements.availabilityBadges.replaceChildren(...badges);
+  elements.availabilityMessage.textContent = availability.any
+    ? '실물책은 상태가 좋으면 판매하고, 안 팔리면 기증하세요. 훼손됐으면 폐기해도 돼요.'
+    : '스캔 보내기, 서울 보관, 대전 보관 중에서 선택하세요.';
 }
 
 function resetForm() {
   elements.form.reset();
   $('#book-id').value = '';
   setFormChoice('nextTwoYears', 'unsure');
-  setFormChoice('condition', 'good');
-  setFormChoice('millieStatus', 'unchecked');
+  setFormChoice('condition', 'unknown');
   setFormChoice('disposition', 'auto');
   draftCoverUrl = '';
   renderCoverPreview('', '');
+  renderAvailabilityAlert();
   elements.formTitle.textContent = '새 책 등록';
   elements.lookupStatus.textContent = '바코드를 촬영하거나 ISBN을 입력하세요.';
 }
@@ -273,6 +302,7 @@ function editBook(book) {
   setFormChoice('disposition', book.disposition);
   draftCoverUrl = book.coverUrl || '';
   renderCoverPreview(book.title, draftCoverUrl);
+  renderAvailabilityAlert();
   elements.formTitle.textContent = '책 정보 수정';
   openForm();
 }
@@ -338,7 +368,7 @@ function applyBookMetadata(metadata) {
   $('#publisher').value = metadata.publisher || '';
   draftCoverUrl = metadata.coverUrl || '';
   renderCoverPreview(metadata.title, draftCoverUrl);
-  syncVerifiedMillieChoice();
+  renderAvailabilityAlert();
   return Boolean(metadata.title);
 }
 
@@ -589,10 +619,10 @@ async function scanBarcodePhoto(file) {
 
 async function importBackup(file) {
   try {
-    books = parseBackup(await file.text()).map((book) => createBook(book));
+    books = migratePhysicalBooks(parseBackup(await file.text()));
     persist();
     render();
-    showToast(`${books.length}권을 복원했어요.`);
+    showToast(`실물책 ${books.length}권을 복원했어요.`);
   } catch {
     showToast('올바른 책갈피 백업 파일이 아니에요.');
   }
@@ -638,8 +668,8 @@ for (const inputId of ['barcode-photo', 'barcode-camera-photo', 'scanner-photo',
     event.target.value = '';
   });
 }
-$('#search-millie').addEventListener('click', searchMillie);
-$('#title').addEventListener('change', syncVerifiedMillieChoice);
+$('#title').addEventListener('input', renderAvailabilityAlert);
+elements.form.elements.namedItem('duplicateInSeoul').addEventListener('change', renderAvailabilityAlert);
 $('#close-scanner').addEventListener('click', stopScanner);
 $('#refocus-camera').addEventListener('click', refocusCamera);
 $('#toggle-torch').addEventListener('click', toggleTorch);

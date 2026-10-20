@@ -1,9 +1,9 @@
-const CACHE = 'book-galpi-v21';
+const CACHE = 'book-galpi-v22';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css?v=0.4.15',
-  './src/app.js?v=0.4.15',
+  './styles.css?v=0.4.16',
+  './src/app.js?v=0.4.16',
   './src/domain.js',
   './src/millie-catalog.js',
   './src/millie-covers.js',

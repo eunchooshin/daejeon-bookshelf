@@ -4,121 +4,119 @@ import { readFile } from 'node:fs/promises';
 
 const root = new URL('../', import.meta.url);
 
-test('앱 화면은 등록 폼, 검색, 책장, 데이터 백업 기능을 제공한다', async () => {
-  const html = await readFile(new URL('index.html', root), 'utf8');
-  for (const id of ['book-form', 'isbn', 'scan-isbn', 'scan-photo', 'barcode-photo', 'barcode-camera-photo', 'scanner-photo', 'scanner-camera-photo', 'lookup-isbn', 'search-millie', 'search', 'disposition-filter', 'bookshelf', 'export-csv', 'drive-backup', 'drive-restore', 'import-json', 'next-two-years', 'refocus-camera', 'toggle-torch', 'camera-zoom']) {
+async function source(path) {
+  return readFile(new URL(path, root), 'utf8');
+}
+
+test('앱 화면은 실물책 등록·검색·백업 기능을 제공한다', async () => {
+  const html = await source('index.html');
+  for (const id of ['book-form', 'isbn', 'scan-isbn', 'scan-photo', 'barcode-photo', 'barcode-camera-photo', 'scanner-photo', 'scanner-camera-photo', 'lookup-isbn', 'search', 'disposition-filter', 'bookshelf', 'export-csv', 'drive-backup', 'drive-restore', 'import-json', 'next-two-years', 'refocus-camera', 'toggle-torch', 'camera-zoom']) {
     assert.match(html, new RegExp(`id=["']${id}["']`));
   }
 });
 
-test('카메라 대신 갤러리의 바코드 사진을 올릴 수 있다', async () => {
-  const html = await readFile(new URL('index.html', root), 'utf8');
+test('갤러리 업로드와 휴대폰 기본 카메라 촬영을 모두 지원한다', async () => {
+  const html = await source('index.html');
+  const app = await source('src/app.js');
   assert.match(html, /🖼️ 사진 올려 판독/);
-  assert.match(html, /id=["']barcode-photo["'][^>]*type=["']file["'][^>]*accept=["']image\/\*["']/);
+  assert.match(html, /id=["']barcode-photo["'][^>]*accept=["']image\/\*["']/);
   assert.doesNotMatch(html, /id=["']barcode-photo["'][^>]*capture=/);
-});
-
-test('휴대폰 기본 카메라로 바코드 사진을 찍어 판독할 수 있다', async () => {
-  const html = await readFile(new URL('index.html', root), 'utf8');
-  const app = await readFile(new URL('src/app.js', root), 'utf8');
-  assert.match(html, /📷 바코드 사진 찍기/);
   assert.match(html, /id=["']barcode-camera-photo["'][^>]*capture=["']environment["']/);
   assert.match(html, /id=["']scanner-camera-photo["'][^>]*capture=["']environment["']/);
-  assert.match(html, /id=["']scanner-photo["'][^>]*accept=["']image\/\*["']/);
   assert.match(app, /scanner-camera-photo/);
-  assert.match(app, /scanner-photo/);
 });
 
 test('책을 찾으면 저장 전에도 표지 미리보기를 보여준다', async () => {
-  const html = await readFile(new URL('index.html', root), 'utf8');
-  const app = await readFile(new URL('src/app.js', root), 'utf8');
+  const html = await source('index.html');
+  const app = await source('src/app.js');
   assert.match(html, /id=["']cover-preview["']/);
   assert.match(html, /id=["']cover-preview-image["']/);
   assert.match(app, /renderCoverPreview/);
 });
 
-test('책 카드와 상단 요약에 PDF 소장 상태를 표시한다', async () => {
-  const app = await readFile(new URL('src/app.js', root), 'utf8');
-  const html = await readFile(new URL('index.html', root), 'utf8');
-  assert.match(app, /📄 PDF 소장/);
-  assert.match(app, /book\.pdfOwned/);
-  assert.match(html, /📄 PDF 소장 → 🎁 기증/);
-  assert.match(html, /📄 PDF 소장 → ♻️ 폐기/);
+test('책 검색 직후 큰 대체 자료 안내 카드를 인라인으로 보여준다', async () => {
+  const html = await source('index.html');
+  const app = await source('src/app.js');
+  const css = await source('styles.css');
+  assert.match(html, /id=["']availability-alert["']/);
+  assert.match(html, /id=["']availability-title["']/);
+  assert.match(app, /renderAvailabilityAlert/);
+  assert.match(app, /📄 PDF 있음/);
+  assert.match(app, /📱 밀리에 있음/);
+  assert.match(app, /👯 실물책 한 권 더 있음/);
+  assert.match(css, /\.availability-alert/);
+  assert.match(css, /\.availability-alert h3[^}]*font-size:\s*1\.55rem/);
 });
 
-test('정리 선택지는 빠르게 구분할 수 있는 이모지를 포함한다', async () => {
-  const html = await readFile(new URL('index.html', root), 'utf8');
-  for (const label of ['📌 자주 참고함', '✍️ 메모·필기 있음', '💎 절판·희귀본', '🤔 판단이 안 됨', '✨ 양호', '📱 완전판 있음', '🏠 보관 · 서울']) {
+test('상단에 새 분류 원칙과 5개 상자·폐기 봉투 안내를 크게 표시한다', async () => {
+  const html = await source('index.html');
+  const css = await source('styles.css');
+  assert.match(html, /⚠️ 어딘가 없음/);
+  assert.match(html, /✅ 어딘가 있음/);
+  assert.match(html, /5개 상자/);
+  assert.match(html, /폐기 봉투/);
+  assert.match(css, /\.sorting-flow h2[^}]*font-size:\s*clamp\(28px/);
+  assert.match(css, /\.sorting-branch h3[^}]*font-size:\s*clamp\(24px/);
+});
+
+test('실물 상태와 최종 목적지는 한 번에 보이는 라디오 버튼이다', async () => {
+  const html = await source('index.html');
+  for (const name of ['nextTwoYears', 'condition', 'disposition']) {
+    assert.doesNotMatch(html, new RegExp(`<select[^>]+name=["']${name}["']`));
+    assert.match(html, new RegExp(`type=["']radio["'][^>]+name=["']${name}["']`));
+  }
+  for (const label of ['❔ 상태 확인 필요', '🏠 서울 보관 · 자주 볼 책', '🏡 대전 보관 · 장기 보관', '📤 스캔 보내기', '💰 판매 중 · 상태 좋음', '🎁 기증', '♻️ 폐기']) {
     assert.match(html, new RegExp(label));
   }
 });
 
-test('정리 선택지는 드롭다운 대신 한 번에 보이는 라디오 버튼이다', async () => {
-  const html = await readFile(new URL('index.html', root), 'utf8');
-  for (const name of ['nextTwoYears', 'condition', 'millieStatus', 'disposition']) {
-    assert.doesNotMatch(html, new RegExp(`<select[^>]+name=["']${name}["']`));
-    assert.match(html, new RegExp(`type=["']radio["'][^>]+name=["']${name}["']`));
-  }
-  assert.match(html, /class=["'][^"']*choice-grid/);
+test('대체 자료 카탈로그는 실물책장과 분리해 마이그레이션한다', async () => {
+  const app = await source('src/app.js');
+  assert.match(app, /migratePhysicalBooks/);
+  assert.match(app, /physical-books-v6/);
+  assert.doesNotMatch(app, /mergeVerifiedMillieCatalog\(loaded\)/);
+  assert.doesNotMatch(app, /mergePdfCatalog\(mergeVerifiedMillieCatalog/);
 });
 
-test('최종 결정 기준을 눌러서 펼쳐 볼 수 있다', async () => {
-  const html = await readFile(new URL('index.html', root), 'utf8');
-  assert.match(html, /<details class=["']criteria-guide["']/);
-  assert.match(html, /🧭 최종 결정 기준 보기/);
-  assert.match(html, /보류 상자 1개에만 보관/);
+test('스캔 완료 버튼은 PDF 있음과 폐기로 동시에 전환한다', async () => {
+  const app = await source('src/app.js');
+  assert.match(app, /✅ 스캔 완료 → 폐기/);
+  assert.match(app, /pdfOwned: true, disposition: 'recycle'/);
 });
 
-test('검수된 밀리 목록을 내 책장에 넣고 자동 표시한다고 안내한다', async () => {
-  const html = await readFile(new URL('index.html', root), 'utf8');
-  const app = await readFile(new URL('src/app.js', root), 'utf8');
-  assert.match(html, /노션 표지를 붙인 밀리 보유 도서 121권을 내 책장에 넣고/);
-  assert.match(app, /isVerifiedMillieTitle/);
-  assert.match(app, /setFormChoice\('millieStatus', 'full'\)/);
-  assert.match(app, /mergeVerifiedMillieCatalog/);
-  assert.match(app, /daejeon-bookshelf\.millie-catalog-2026-10-08/);
-  assert.match(app, /cls-121-pdf-67-v5/);
-  assert.match(app, /📱 밀리에도 있음/);
-});
-
-test('책장 필터 드롭다운에도 결정별 이모지를 표시한다', async () => {
-  const html = await readFile(new URL('index.html', root), 'utf8');
-  for (const option of ['🏠 보관 · 서울', '🏡 보관 · 대전', '👯 중복 → 🎁 기증', '👯 중복 → ♻️ 폐기', '📱 밀리 → 🎁 기증', '📱 밀리 → ♻️ 폐기', '💰 중고 판매 · 상태 좋음']) {
+test('책장 필터와 상단 요약은 새 실물 목적지만 보여준다', async () => {
+  const html = await source('index.html');
+  const app = await source('src/app.js');
+  for (const option of ['❔ 상태 확인 필요', '🏠 서울 보관', '🏡 대전 보관', '📤 스캔 보내기', '💰 판매 중', '🎁 기증', '♻️ 폐기']) {
     assert.match(html, new RegExp(`<option[^>]*>${option}</option>`));
   }
-  assert.doesNotMatch(html, /온라인 읽은 책/);
-});
-
-test('상단 요약은 보관·스캔·중복·밀리·판매 체계를 이모지와 함께 보여준다', async () => {
-  const app = await readFile(new URL('src/app.js', root), 'utf8');
-  for (const label of ['📚 전체', '🏠 서울 보관', '🏡 대전 보관', '📄 스캔', '👯 중복 정리', '📱 밀리 대체', '💰 중고 판매', '📦 보류']) {
+  for (const label of ['📚 실물책', '❔ 확인 필요', '🏠 서울', '🏡 대전', '📤 스캔', '💰 판매', '🎁 기증', '♻️ 폐기']) {
     assert.match(app, new RegExp(`summaryItem\\('${label}'`));
   }
-  assert.doesNotMatch(app, /summaryItem\('온라인 읽은 책'/);
 });
 
 test('새 화면과 이전 CSS가 섞이지 않도록 정적 파일 버전을 고정한다', async () => {
-  const html = await readFile(new URL('index.html', root), 'utf8');
-  const worker = await readFile(new URL('sw.js', root), 'utf8');
-  assert.match(html, /styles\.css\?v=0\.4\.15/);
-  assert.match(html, /src\/app\.js\?v=0\.4\.15/);
-  assert.match(worker, /styles\.css\?v=0\.4\.15/);
-  assert.match(worker, /src\/app\.js\?v=0\.4\.15/);
-  assert.match(worker, /src\/millie-covers\.js/);
-  assert.match(worker, /book-galpi-v21/);
+  const html = await source('index.html');
+  const worker = await source('sw.js');
+  assert.match(html, /styles\.css\?v=0\.4\.16/);
+  assert.match(html, /src\/app\.js\?v=0\.4\.16/);
+  assert.match(worker, /styles\.css\?v=0\.4\.16/);
+  assert.match(worker, /src\/app\.js\?v=0\.4\.16/);
+  assert.match(worker, /src\/pdf-catalog\.js/);
+  assert.match(worker, /book-galpi-v22/);
 });
 
 test('바코드 폴리필 자산을 앱 자체에서 불러온다', async () => {
-  const html = await readFile(new URL('index.html', root), 'utf8');
+  const html = await source('index.html');
   assert.match(html, /vendor\/zbar-wasm\.js/);
   assert.match(html, /vendor\/barcode-detector-polyfill\.js/);
 });
 
 test('PWA 매니페스트와 서비스워커가 연결되어 있다', async () => {
-  const html = await readFile(new URL('index.html', root), 'utf8');
-  const manifest = JSON.parse(await readFile(new URL('manifest.webmanifest', root), 'utf8'));
-  const app = await readFile(new URL('src/app.js', root), 'utf8');
-  const worker = await readFile(new URL('sw.js', root), 'utf8');
+  const html = await source('index.html');
+  const manifest = JSON.parse(await source('manifest.webmanifest'));
+  const app = await source('src/app.js');
+  const worker = await source('sw.js');
   assert.match(html, /manifest\.webmanifest/);
   assert.equal(manifest.display, 'standalone');
   assert.match(app, /serviceWorker\.register/);
