@@ -11,6 +11,13 @@ test('앱 화면은 등록 폼, 검색, 책장, 데이터 백업 기능을 제�
   }
 });
 
+test('카메라 대신 갤러리의 바코드 사진을 올릴 수 있다', async () => {
+  const html = await readFile(new URL('index.html', root), 'utf8');
+  assert.match(html, /사진 올리기/);
+  assert.match(html, /id=["']barcode-photo["'][^>]*type=["']file["'][^>]*accept=["']image\/\*["']/);
+  assert.doesNotMatch(html, /id=["']barcode-photo["'][^>]*capture=/);
+});
+
 test('책을 찾으면 저장 전에도 표지 미리보기를 보여준다', async () => {
   const html = await readFile(new URL('index.html', root), 'utf8');
   const app = await readFile(new URL('src/app.js', root), 'utf8');
@@ -73,12 +80,12 @@ test('상단 요약은 보관·스캔·중복·밀리·판매 체계를 이모�
 test('새 화면과 이전 CSS가 섞이지 않도록 정적 파일 버전을 고정한다', async () => {
   const html = await readFile(new URL('index.html', root), 'utf8');
   const worker = await readFile(new URL('sw.js', root), 'utf8');
-  assert.match(html, /styles\.css\?v=0\.4\.12/);
-  assert.match(html, /src\/app\.js\?v=0\.4\.12/);
-  assert.match(worker, /styles\.css\?v=0\.4\.12/);
-  assert.match(worker, /src\/app\.js\?v=0\.4\.12/);
+  assert.match(html, /styles\.css\?v=0\.4\.13/);
+  assert.match(html, /src\/app\.js\?v=0\.4\.13/);
+  assert.match(worker, /styles\.css\?v=0\.4\.13/);
+  assert.match(worker, /src\/app\.js\?v=0\.4\.13/);
   assert.match(worker, /src\/millie-covers\.js/);
-  assert.match(worker, /book-galpi-v18/);
+  assert.match(worker, /book-galpi-v19/);
 });
 
 test('바코드 폴리필 자산을 앱 자체에서 불러온다', async () => {

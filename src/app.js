@@ -533,7 +533,7 @@ async function scanFrame(detector) {
 async function startScanner() {
   const Detector = barcodeDetectorClass();
   if (!Detector || !navigator.mediaDevices?.getUserMedia) {
-    showToast('실시간 카메라를 열 수 없어요. 바로 옆의 사진 촬영을 이용해주세요.');
+    showToast('실시간 카메라를 열 수 없어요. 바로 옆의 사진 올리기를 이용해주세요.');
     return;
   }
   try {
@@ -573,14 +573,14 @@ async function scanBarcodePhoto(file) {
     const results = await detector.detect(file);
     const found = results.find((result) => normalizeIsbn(result.rawValue));
     if (!found) {
-      elements.lookupStatus.textContent = '사진에서 ISBN을 찾지 못했어요. 바코드만 크게 다시 촬영해주세요.';
+      elements.lookupStatus.textContent = '사진에서 ISBN을 찾지 못했어요. 바코드가 크게 나온 사진을 골라주세요.';
       return;
     }
     $('#isbn').value = normalizeIsbn(found.rawValue);
     await lookupIsbn();
     showToast('사진에서 ISBN을 인식했어요.');
   } catch {
-    elements.lookupStatus.textContent = '사진을 읽지 못했어요. 바코드를 밝고 선명하게 다시 촬영해주세요.';
+    elements.lookupStatus.textContent = '사진을 읽지 못했어요. 바코드가 밝고 선명한 사진을 골라주세요.';
   }
 }
 
