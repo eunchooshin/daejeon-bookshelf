@@ -13,6 +13,7 @@ import {
   buildBackup,
   parseBackup,
   mergeVerifiedMillieCatalog,
+  mergePdfCatalog,
   dispositionLabels,
 } from '../src/domain.js';
 
@@ -106,10 +107,23 @@ test('기존 책의 사용자 표지는 보존하고 빈 표지만 노션 그림
   assert.match(merged.find((book) => book.id === 'blank').coverUrl, /^assets\/covers\/millie\//);
 });
 
+test('Drive PDF 67종을 중복 없이 합치고 밀리 중복 책은 두 소장 상태를 모두 보존한다', () => {
+  const millie = mergeVerifiedMillieCatalog([], '2026-10-20T00:00:00.000Z');
+  const merged = mergePdfCatalog(millie, '2026-10-20T00:00:00.000Z');
+  assert.equal(merged.length, 187);
+  const overlap = merged.find((book) => book.title === '아웃풋 트레이닝');
+  assert.equal(overlap.pdfOwned, true);
+  assert.equal(overlap.millieStatus, 'full');
+  assert.equal(overlap.disposition, 'pdf_donate');
+  assert.equal(mergePdfCatalog(merged).length, 187);
+});
+
 test('책 카드 드롭다운에 정리 결정 이모지가 포함된다', () => {
   assert.equal(dispositionLabels.millie_donate, '📱 밀리 → 🎁 기증');
   assert.equal(dispositionLabels.keep_daejeon, '🏡 보관 · 대전');
   assert.equal(dispositionLabels.sell, '💰 중고 판매 · 상태 좋음');
+  assert.equal(dispositionLabels.pdf_donate, '📄 PDF 소장 → 🎁 기증');
+  assert.equal(dispositionLabels.pdf_recycle, '📄 PDF 소장 → ♻️ 폐기');
 });
 
 test('책장은 추가와 수정 시 기존 순서를 안전하게 유지한다', () => {
@@ -134,7 +148,7 @@ test('제목 검색과 정리 결정 필터를 함께 적용한다', () => {
 });
 
 test('실물책 정리 대상으로 대전 집에서 나갈 책을 센다', () => {
-  for (const disposition of ['scan', 'duplicate_donate', 'duplicate_recycle', 'millie_donate', 'millie_recycle', 'sell']) {
+  for (const disposition of ['scan', 'duplicate_donate', 'duplicate_recycle', 'millie_donate', 'millie_recycle', 'pdf_donate', 'pdf_recycle', 'sell']) {
     assert.equal(isOutbound({ disposition }), true);
   }
   assert.equal(isOutbound({ disposition: 'read_archive' }), false);

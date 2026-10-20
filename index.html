@@ -7,7 +7,7 @@
   <meta name="description" content="대전 집 책 정리를 위한 개인용 책장과 보관·스캔·기증 결정 도우미">
   <title>책갈피 — 대전 책 정리</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=0.4.13">
+  <link rel="stylesheet" href="styles.css?v=0.4.14">
 </head>
 <body>
   <header class="topbar">
@@ -115,6 +115,7 @@
               <p><strong>🏠 보관 · 서울</strong><span>앞으로 1~2년 안에 확실히 읽거나 자주 참고할 책</span></p>
               <p><strong>🏡 보관 · 대전</strong><span>절판·전문자료·필기가 있어 대전에 남길 책</span></p>
               <p><strong>📄 스캔</strong><span>필요한 내용만 디지털로 남기면 충분한 책</span></p>
+              <p><strong>📄 PDF 소장 → 기증·폐기</strong><span>이미 스캔본을 소장해 실물은 상태에 따라 기증하거나 폐기</span></p>
               <p><strong>👯 중복 → 기증·폐기</strong><span>상태가 좋으면 기증하고 훼손됐으면 폐기</span></p>
               <p><strong>📱 밀리 → 기증·폐기</strong><span>밀리로 대체하고 상태가 좋으면 기증, 훼손됐으면 폐기</span></p>
               <p><strong>💰 중고 판매</strong><span>상태가 좋은 책만 판매</span></p>
@@ -129,6 +130,8 @@
               <label><input type="radio" name="disposition" value="keep_seoul"><span>🏠 보관 · 서울</span></label>
               <label><input type="radio" name="disposition" value="keep_daejeon"><span>🏡 보관 · 대전</span></label>
               <label><input type="radio" name="disposition" value="scan"><span>📄 스캔</span></label>
+              <label><input type="radio" name="disposition" value="pdf_donate"><span>📄 PDF 소장 → 🎁 기증</span></label>
+              <label><input type="radio" name="disposition" value="pdf_recycle"><span>📄 PDF 소장 → ♻️ 폐기</span></label>
               <label><input type="radio" name="disposition" value="duplicate_donate"><span>👯 중복 → 🎁 기증</span></label>
               <label><input type="radio" name="disposition" value="duplicate_recycle"><span>👯 중복 → ♻️ 폐기</span></label>
               <label><input type="radio" name="disposition" value="millie_donate"><span>📱 밀리 → 🎁 기증</span></label>
@@ -162,7 +165,7 @@
         <div class="toolbar">
           <label class="search-box"><span class="sr-only">책 검색</span><input id="search" type="search" placeholder="제목, 저자, ISBN, 박스 검색"></label>
           <select id="disposition-filter" aria-label="정리 결정 필터">
-            <option value="all">🗂️ 모든 결정</option><option value="keep_seoul">🏠 보관 · 서울</option><option value="keep_daejeon">🏡 보관 · 대전</option><option value="scan">📄 스캔</option><option value="duplicate_donate">👯 중복 → 🎁 기증</option><option value="duplicate_recycle">👯 중복 → ♻️ 폐기</option><option value="millie_donate">📱 밀리 → 🎁 기증</option><option value="millie_recycle">📱 밀리 → ♻️ 폐기</option><option value="sell">💰 중고 판매 · 상태 좋음</option><option value="defer">📦 보류 상자</option>
+            <option value="all">🗂️ 모든 결정</option><option value="keep_seoul">🏠 보관 · 서울</option><option value="keep_daejeon">🏡 보관 · 대전</option><option value="scan">📄 스캔</option><option value="pdf_donate">📄 PDF 소장 → 🎁 기증</option><option value="pdf_recycle">📄 PDF 소장 → ♻️ 폐기</option><option value="duplicate_donate">👯 중복 → 🎁 기증</option><option value="duplicate_recycle">👯 중복 → ♻️ 폐기</option><option value="millie_donate">📱 밀리 → 🎁 기증</option><option value="millie_recycle">📱 밀리 → ♻️ 폐기</option><option value="sell">💰 중고 판매 · 상태 좋음</option><option value="defer">📦 보류 상자</option>
           </select>
         </div>
 
@@ -192,6 +195,6 @@
     window.BookBarcodeDetectorPolyfill = barcodeDetectorPolyfill.BarcodeDetectorPolyfill;
     window.BookBarcodeDetector = window.BarcodeDetector || window.BookBarcodeDetectorPolyfill;
   </script>
-  <script type="module" src="src/app.js?v=0.4.13"></script>
+  <script type="module" src="src/app.js?v=0.4.14"></script>
 </body>
 </html>

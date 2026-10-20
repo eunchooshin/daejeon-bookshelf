@@ -1,0 +1,82 @@
+// CLS Google Drive 공유 폴더에서 확인한 PDF 소장 목록입니다. 파일·링크는 포함하지 않습니다.
+export const PDF_CATALOG = Object.freeze([
+  Object.freeze({"title": "1인 학원 성공 경영 부스터","fileCount": 1}),
+  Object.freeze({"title": "8.23 정미숙 소장의 홍보물 만들기 교육링크","fileCount": 1}),
+  Object.freeze({"title": "2028 대입 완전 정복","fileCount": 1}),
+  Object.freeze({"title": "1년에 10억 버는 방구석 비즈니스","fileCount": 1}),
+  Object.freeze({"title": "나는 이불 속에서 콘텐츠로 월급 번다","fileCount": 2}),
+  Object.freeze({"title": "나는 주말마다 10억버는 비즈니스를 한다","fileCount": 1}),
+  Object.freeze({"title": "모스틱 자세 운동","fileCount": 1}),
+  Object.freeze({"title": "부자 마인드 셋","fileCount": 1}),
+  Object.freeze({"title": "거투의 소액경매 7777","fileCount": 1}),
+  Object.freeze({"title": "그래서 학원 마케팅","fileCount": 1}),
+  Object.freeze({"title": "그래서 학원 인스타","fileCount": 1}),
+  Object.freeze({"title": "나는 왜 생각만 하고 그대로일까","fileCount": 1}),
+  Object.freeze({"title": "내 마음의 구급약","fileCount": 1}),
+  Object.freeze({"title": "노빠꾸학 개론","fileCount": 1}),
+  Object.freeze({"title": "노빠꾸학원 경영학 개론","fileCount": 1}),
+  Object.freeze({"title": "말은 운명을 데려온다","fileCount": 1}),
+  Object.freeze({"title": "모든 비즈니스는 브랜딩이다","fileCount": 1}),
+  Object.freeze({"title": "무조건 성적이 오르는 쿼드스터디","fileCount": 1}),
+  Object.freeze({"title": "백년목","fileCount": 1}),
+  Object.freeze({"title": "백년운동","fileCount": 1}),
+  Object.freeze({"title": "백년허리 [1]","fileCount": 1}),
+  Object.freeze({"title": "백년허리 [2]","fileCount": 1}),
+  Object.freeze({"title": "변하는 것과 변하지 않는 것","fileCount": 1}),
+  Object.freeze({"title": "보도새펴의 돈","fileCount": 1}),
+  Object.freeze({"title": "사업의 철학","fileCount": 1}),
+  Object.freeze({"title": "생각의 도약","fileCount": 1}),
+  Object.freeze({"title": "신과 나눈 이야기 [2]","fileCount": 1}),
+  Object.freeze({"title": "신과 나눈 이야기 [3]","fileCount": 1}),
+  Object.freeze({"title": "실리콘밸리 프로세스의 힘","fileCount": 1}),
+  Object.freeze({"title": "실패를 통과하는 일","fileCount": 2}),
+  Object.freeze({"title": "예민해서 힘들 땐 뇌과학 [이유 없이 우울하고, 피곤하고, 아픈 HSP를 위한 5단계 치유 플랜]","fileCount": 1}),
+  Object.freeze({"title": "온라인초보자가경제적자유를빠르게만드는25가지법칙","fileCount": 1}),
+  Object.freeze({"title": "원 이어 - 가장 탁월한 나를 만드는 시간","fileCount": 1}),
+  Object.freeze({"title": "이기동의 영어 전치사","fileCount": 2}),
+  Object.freeze({"title": "종이 한 장으로 요약하는 기술","fileCount": 1}),
+  Object.freeze({"title": "혼자 공부하는 바이브코딩","fileCount": 1}),
+  Object.freeze({"title": "건강의 뇌과학 [날마다 젊어지는 뇌의 비밀]","fileCount": 1}),
+  Object.freeze({"title": "고등생활의 레시피","fileCount": 1}),
+  Object.freeze({"title": "고민 숏컷의 기술 [예민해서 고생해온 정신과의사가 터득한 나를 괴롭히지 않는 생각법]","fileCount": 1}),
+  Object.freeze({"title": "교육의 뇌과학 [뇌과학이 밝혀낸 공부 잘하는 아이들의 비밀]","fileCount": 1}),
+  Object.freeze({"title": "구독경제 마케팅","fileCount": 1}),
+  Object.freeze({"title": "꿈을 실현시키는 빨간 책 It Workd","fileCount": 1}),
+  Object.freeze({"title": "나는 거인에게 억만장자가 되는 법을 배웠다","fileCount": 1}),
+  Object.freeze({"title": "뇌과학의 쓸모 [슬기로운 어른을 위한 100가지 뇌 활용법]","fileCount": 1}),
+  Object.freeze({"title": "다이어트의 뇌과학 [요요 없이 평생 유지하는 뇌과학 기반 다이어트 혁명]","fileCount": 1}),
+  Object.freeze({"title": "매출 500억 미용실을 만든 시스템 설계법","fileCount": 1}),
+  Object.freeze({"title": "신과 나눈 이야기 [1]","fileCount": 1}),
+  Object.freeze({"title": "완벽한 원시인","fileCount": 1}),
+  Object.freeze({"title": "운동의 뇌과학 [불안장애에 시달린 뇌과학자가 발견한 7가지 운동의 힘]","fileCount": 1}),
+  Object.freeze({"title": "중학생활의 레시피","fileCount": 1}),
+  Object.freeze({"title": "집중의 뇌과학 [뇌과학으로 설계하는 22가지 집중력 극대화 솔루션]","fileCount": 1}),
+  Object.freeze({"title": "필링 그레이트","fileCount": 1}),
+  Object.freeze({"title": "학군의 지리학","fileCount": 1}),
+  Object.freeze({"title": "행동력 수업 [생각을 행동으로, 행동을 습관으로 만드는 힘]","fileCount": 1}),
+  Object.freeze({"title": "아웃풋 트레이닝","fileCount": 1}),
+  Object.freeze({"title": "2024년 온라인 마케팅 써머리 v1.5(크기수정)","fileCount": 1}),
+  Object.freeze({"title": "HPC 요약본 1","fileCount": 1}),
+  Object.freeze({"title": "HPC 요약본 2","fileCount": 1}),
+  Object.freeze({"title": "HPC 요약본 3","fileCount": 1}),
+  Object.freeze({"title": "경제적-자유-예약하기-PDF_v2.13","fileCount": 1}),
+  Object.freeze({"title": "공식버전-학원-블로그-혁명서-1.0-uazzk1","fileCount": 1}),
+  Object.freeze({"title": "Phonics [1]","fileCount": 1}),
+  Object.freeze({"title": "Phonics [2]","fileCount": 1}),
+  Object.freeze({"title": "Phonics [3]","fileCount": 1}),
+  Object.freeze({"title": "Phonics [4]","fileCount": 1}),
+  Object.freeze({"title": "Phonics [5]","fileCount": 1}),
+  Object.freeze({"title": "Phonics [6]","fileCount": 1}),
+]);
+
+const PDF_BY_TITLE = new Map(PDF_CATALOG.map((entry) => [entry.title.normalize('NFKC').replace(/\s+/g, ' ').trim().toLocaleLowerCase('ko'), entry]));
+
+export function pdfFileCountForTitle(title = '') {
+  const key = String(title).normalize('NFKC').replace(/\s+/g, ' ').trim().toLocaleLowerCase('ko');
+  return PDF_BY_TITLE.get(key)?.fileCount || 0;
+}
+
+export function isPdfOwnedTitle(title = '') {
+  return pdfFileCountForTitle(title) > 0;
+}
+

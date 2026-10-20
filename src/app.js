@@ -2,6 +2,7 @@ import {
   buildBackup,
   booksToCsv,
   createBook,
+  mergePdfCatalog,
   mergeVerifiedMillieCatalog,
   dispositionLabels,
   filterBooks,
@@ -27,7 +28,7 @@ import { isVerifiedMillieTitle } from './millie-catalog.js';
 
 const STORAGE_KEY = 'daejeon-bookshelf.v1';
 const MILLIE_IMPORT_KEY = 'daejeon-bookshelf.millie-catalog-2026-10-08';
-const MILLIE_IMPORT_VERSION = 'cls-121-v4';
+const MILLIE_IMPORT_VERSION = 'cls-121-pdf-67-v5';
 const millieLabels = { unchecked: '밀리 확인 전', full: '📱 밀리에도 있음', partial: '밀리 일부·요약', not_found: '밀리 없음' };
 const $ = (selector) => document.querySelector(selector);
 
@@ -58,13 +59,13 @@ function loadBooks() {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     let loaded = Array.isArray(parsed) ? parsed.map((book) => createBook(book)) : [];
     if (localStorage.getItem(MILLIE_IMPORT_KEY) !== MILLIE_IMPORT_VERSION) {
-      loaded = mergeVerifiedMillieCatalog(loaded);
+      loaded = mergePdfCatalog(mergeVerifiedMillieCatalog(loaded));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(loaded));
       localStorage.setItem(MILLIE_IMPORT_KEY, MILLIE_IMPORT_VERSION);
     }
     return loaded;
   } catch {
-    const loaded = mergeVerifiedMillieCatalog([]);
+    const loaded = mergePdfCatalog(mergeVerifiedMillieCatalog([]));
     localStorage.setItem(STORAGE_KEY, JSON.stringify(loaded));
     localStorage.setItem(MILLIE_IMPORT_KEY, MILLIE_IMPORT_VERSION);
     return loaded;
@@ -114,6 +115,7 @@ function renderSummary() {
     summaryItem('🏠 서울 보관', books.filter((book) => book.disposition === 'keep_seoul').length),
     summaryItem('🏡 대전 보관', books.filter((book) => book.disposition === 'keep_daejeon').length),
     summaryItem('📄 스캔', books.filter((book) => book.disposition === 'scan').length),
+    summaryItem('📄 PDF 소장', books.filter((book) => book.pdfOwned).length),
     summaryItem('👯 중복 정리', books.filter((book) => book.disposition.startsWith('duplicate_')).length),
     summaryItem('📱 밀리 대체', books.filter((book) => book.disposition.startsWith('millie_')).length),
     summaryItem('💰 중고 판매', books.filter((book) => book.disposition === 'sell').length),
@@ -184,6 +186,7 @@ function renderBook(book) {
   tags.className = 'book-tags';
   tags.append(tag(dispositionLabels[book.disposition] || '미결정'));
   tags.append(tag(millieLabels[book.millieStatus] || millieLabels.unchecked, 'millie'));
+  if (book.pdfOwned) tags.append(tag(`📄 PDF 소장${book.pdfFileCount > 1 ? ` · ${book.pdfFileCount}개 파일` : ''}`, 'pdf'));
   if (book.annotated) tags.append(tag('필기 있음'));
   if (book.rare) tags.append(tag('희귀·절판'));
   if (book.favorite) tags.append(tag('애장본'));

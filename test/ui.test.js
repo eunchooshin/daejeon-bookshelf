@@ -26,6 +26,15 @@ test('책을 찾으면 저장 전에도 표지 미리보기를 보여준다', as
   assert.match(app, /renderCoverPreview/);
 });
 
+test('책 카드와 상단 요약에 PDF 소장 상태를 표시한다', async () => {
+  const app = await readFile(new URL('src/app.js', root), 'utf8');
+  const html = await readFile(new URL('index.html', root), 'utf8');
+  assert.match(app, /📄 PDF 소장/);
+  assert.match(app, /book\.pdfOwned/);
+  assert.match(html, /📄 PDF 소장 → 🎁 기증/);
+  assert.match(html, /📄 PDF 소장 → ♻️ 폐기/);
+});
+
 test('정리 선택지는 빠르게 구분할 수 있는 이모지를 포함한다', async () => {
   const html = await readFile(new URL('index.html', root), 'utf8');
   for (const label of ['📌 자주 참고함', '✍️ 메모·필기 있음', '💎 절판·희귀본', '🤔 판단이 안 됨', '✨ 양호', '📱 완전판 있음', '🏠 보관 · 서울']) {
@@ -57,7 +66,7 @@ test('검수된 밀리 목록을 내 책장에 넣고 자동 표시한다고 안
   assert.match(app, /setFormChoice\('millieStatus', 'full'\)/);
   assert.match(app, /mergeVerifiedMillieCatalog/);
   assert.match(app, /daejeon-bookshelf\.millie-catalog-2026-10-08/);
-  assert.match(app, /cls-121-v4/);
+  assert.match(app, /cls-121-pdf-67-v5/);
   assert.match(app, /📱 밀리에도 있음/);
 });
 
@@ -80,12 +89,12 @@ test('상단 요약은 보관·스캔·중복·밀리·판매 체계를 이모�
 test('새 화면과 이전 CSS가 섞이지 않도록 정적 파일 버전을 고정한다', async () => {
   const html = await readFile(new URL('index.html', root), 'utf8');
   const worker = await readFile(new URL('sw.js', root), 'utf8');
-  assert.match(html, /styles\.css\?v=0\.4\.13/);
-  assert.match(html, /src\/app\.js\?v=0\.4\.13/);
-  assert.match(worker, /styles\.css\?v=0\.4\.13/);
-  assert.match(worker, /src\/app\.js\?v=0\.4\.13/);
+  assert.match(html, /styles\.css\?v=0\.4\.14/);
+  assert.match(html, /src\/app\.js\?v=0\.4\.14/);
+  assert.match(worker, /styles\.css\?v=0\.4\.14/);
+  assert.match(worker, /src\/app\.js\?v=0\.4\.14/);
   assert.match(worker, /src\/millie-covers\.js/);
-  assert.match(worker, /book-galpi-v19/);
+  assert.match(worker, /book-galpi-v20/);
 });
 
 test('바코드 폴리필 자산을 앱 자체에서 불러온다', async () => {
