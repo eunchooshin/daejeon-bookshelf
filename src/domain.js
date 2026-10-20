@@ -1,3 +1,5 @@
+import { applyVerifiedMillieStatus } from './millie-catalog.js';
+
 export function recommendDisposition(book = {}) {
   if (book.duplicateInSeoul) return 'duplicate';
   if (book.alreadyRead && book.referenceBook) return 'read_archive';
@@ -83,6 +85,7 @@ export function createBook(input = {}) {
     createdAt: new Date().toISOString(),
   };
   const book = { ...base, ...input, isbn: normalizeIsbn(input.isbn) };
+  book.millieStatus = applyVerifiedMillieStatus(book);
   book.disposition = input.disposition || recommendDisposition(book);
   return assignDeferredBox(book);
 }

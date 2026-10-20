@@ -74,6 +74,11 @@ test('새 책은 새 기준의 기본값과 추천 결정을 포함한다', () =
   assert.equal(book.millieStatus, 'unchecked');
 });
 
+test('검수된 제목의 책은 기존 수동 선택을 해치지 않고 밀리 완전판으로 표시한다', () => {
+  assert.equal(createBook({ id: 'millie', title: '세이노의 가르침' }).millieStatus, 'full');
+  assert.equal(createBook({ id: 'manual', title: '세이노의 가르침', millieStatus: 'not_found' }).millieStatus, 'not_found');
+});
+
 test('책장은 추가와 수정 시 기존 순서를 안전하게 유지한다', () => {
   const first = createBook({ id: '1', title: '첫 책' });
   const second = createBook({ id: '2', title: '둘째 책' });

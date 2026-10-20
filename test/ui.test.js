@@ -42,13 +42,22 @@ test('최종 결정 기준을 눌러서 펼쳐 볼 수 있다', async () => {
   assert.match(html, /보류 상자 1개에만 보관/);
 });
 
+test('검수된 밀리 목록 자동 표시를 화면에서 안내한다', async () => {
+  const html = await readFile(new URL('index.html', root), 'utf8');
+  const app = await readFile(new URL('src/app.js', root), 'utf8');
+  assert.match(html, /옵시디언에서 검수한 밀리 보유 도서 121권/);
+  assert.match(app, /isVerifiedMillieTitle/);
+  assert.match(app, /setFormChoice\('millieStatus', 'full'\)/);
+});
+
 test('새 화면과 이전 CSS가 섞이지 않도록 정적 파일 버전을 고정한다', async () => {
   const html = await readFile(new URL('index.html', root), 'utf8');
   const worker = await readFile(new URL('sw.js', root), 'utf8');
-  assert.match(html, /styles\.css\?v=0\.4\.5/);
-  assert.match(html, /src\/app\.js\?v=0\.4\.5/);
-  assert.match(worker, /styles\.css\?v=0\.4\.5/);
-  assert.match(worker, /src\/app\.js\?v=0\.4\.5/);
+  assert.match(html, /styles\.css\?v=0\.4\.6/);
+  assert.match(html, /src\/app\.js\?v=0\.4\.6/);
+  assert.match(worker, /styles\.css\?v=0\.4\.6/);
+  assert.match(worker, /src\/app\.js\?v=0\.4\.6/);
+  assert.match(worker, /src\/millie-catalog\.js/);
 });
 
 test('바코드 폴리필 자산을 앱 자체에서 불러온다', async () => {

@@ -22,6 +22,7 @@ import {
   openLibraryJsonpUrl,
   pickBarcodeDetector,
 } from './integrations.js';
+import { isVerifiedMillieTitle } from './millie-catalog.js';
 
 const STORAGE_KEY = 'daejeon-bookshelf.v1';
 const millieLabels = { unchecked: '밀리 확인 전', full: '밀리 완전판', partial: '밀리 일부·요약', not_found: '밀리 없음' };
@@ -220,6 +221,14 @@ function setFormChoice(name, value) {
   choices.forEach((choice) => { choice.checked = choice.value === value; });
 }
 
+function syncVerifiedMillieChoice() {
+  const current = elements.form.querySelector('input[name="millieStatus"]:checked')?.value;
+  if (current === 'unchecked' && isVerifiedMillieTitle($('#title').value)) {
+    setFormChoice('millieStatus', 'full');
+    showToast('📱 검수 목록과 일치해 밀리 완전판으로 표시했어요.');
+  }
+}
+
 function resetForm() {
   elements.form.reset();
   $('#book-id').value = '';
@@ -310,6 +319,7 @@ function applyBookMetadata(metadata) {
   $('#publisher').value = metadata.publisher || '';
   draftCoverUrl = metadata.coverUrl || '';
   renderCoverPreview(metadata.title, draftCoverUrl);
+  syncVerifiedMillieChoice();
   return Boolean(metadata.title);
 }
 
@@ -607,6 +617,7 @@ $('#barcode-photo').addEventListener('change', async (event) => {
   event.target.value = '';
 });
 $('#search-millie').addEventListener('click', searchMillie);
+$('#title').addEventListener('change', syncVerifiedMillieChoice);
 $('#close-scanner').addEventListener('click', stopScanner);
 $('#refocus-camera').addEventListener('click', refocusCamera);
 $('#toggle-torch').addEventListener('click', toggleTorch);
