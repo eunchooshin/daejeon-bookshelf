@@ -7,12 +7,11 @@ import {
 import { millieCoverForTitle } from './millie-covers.js';
 
 export function recommendDisposition(book = {}) {
-  if (book.duplicateInSeoul) return 'duplicate';
-  if (book.nextTwoYears === 'yes' || book.frequentReference) return 'seoul';
-  if (book.favorite || book.rare || book.professional || book.annotated) return 'keep';
-  if (book.millieStatus === 'full' && book.nextTwoYears === 'no') return 'millie';
-  if (book.easyToReplace && book.nextTwoYears !== 'yes') return book.resaleValue ? 'sell' : 'donate';
-  if (book.condition === 'worn' && book.nextTwoYears === 'no') return 'recycle';
+  if (book.duplicateInSeoul) return book.condition === 'worn' ? 'duplicate_recycle' : 'duplicate_donate';
+  if (book.nextTwoYears === 'yes' || book.frequentReference) return 'keep_seoul';
+  if (book.favorite || book.rare || book.professional || book.annotated) return 'keep_daejeon';
+  if (book.millieStatus === 'full' && book.nextTwoYears === 'no') return book.condition === 'worn' ? 'millie_recycle' : 'millie_donate';
+  if (book.easyToReplace && book.resaleValue && book.condition === 'good' && book.nextTwoYears !== 'yes') return 'sell';
   return 'defer';
 }
 
@@ -23,17 +22,30 @@ export function normalizeIsbn(value = '') {
 
 export const dispositionLabels = {
   undecided: '❔ 미결정',
-  seoul: '🚚 서울행',
-  keep: '🔐 대체 불가 보관',
-
-  duplicate: '👯 중복 정리',
+  keep_seoul: '🏠 보관 · 서울',
+  keep_daejeon: '🏡 보관 · 대전',
   defer: '📦 보류 상자',
-  scan: '📄 자가 스캔',
-  millie: '📱 밀리로 대체',
-  sell: '💰 중고 판매',
-  donate: '🎁 기증',
-  recycle: '♻️ 폐기',
+  scan: '📄 스캔',
+  duplicate_donate: '👯 중복 → 🎁 기증',
+  duplicate_recycle: '👯 중복 → ♻️ 폐기',
+  millie_donate: '📱 밀리 → 🎁 기증',
+  millie_recycle: '📱 밀리 → ♻️ 폐기',
+  sell: '💰 중고 판매 · 상태 좋음',
 };
+
+function migrateDisposition(value, condition = 'good') {
+  const legacy = {
+    seoul: 'keep_seoul',
+    keep: 'keep_daejeon',
+    duplicate: condition === 'worn' ? 'duplicate_recycle' : 'duplicate_donate',
+    millie: condition === 'worn' ? 'millie_recycle' : 'millie_donate',
+    donate: 'duplicate_donate',
+    recycle: 'duplicate_recycle',
+    read_archive: 'defer',
+  };
+  if (value === 'sell' && condition !== 'good') return 'defer';
+  return legacy[value] || value;
+}
 
 function csvCell(value) {
   const text = value == null ? '' : String(value);
@@ -91,7 +103,7 @@ export function createBook(input = {}) {
   };
   const book = { ...base, ...input, isbn: normalizeIsbn(input.isbn) };
   book.millieStatus = applyVerifiedMillieStatus(book);
-  book.disposition = input.disposition === 'read_archive' ? 'defer' : input.disposition || recommendDisposition(book);
+  book.disposition = input.disposition ? migrateDisposition(input.disposition, book.condition) : recommendDisposition(book);
   return assignDeferredBox(book);
 }
 
@@ -103,7 +115,7 @@ export function mergeVerifiedMillieCatalog(books = [], createdAt = new Date().to
       ...normalized,
       coverUrl: normalized.coverUrl || millieCoverForTitle(normalized.title),
       millieStatus: 'full',
-      disposition: 'millie',
+      disposition: normalized.condition === 'worn' ? 'millie_recycle' : 'millie_donate',
     };
   });
   const existingTitles = new Set(merged.map((book) => normalizeBookTitle(book.title)));
@@ -116,7 +128,7 @@ export function mergeVerifiedMillieCatalog(books = [], createdAt = new Date().to
       title,
       coverUrl: millieCoverForTitle(title),
       millieStatus: 'full',
-      disposition: 'millie',
+      disposition: 'millie_donate',
       source: 'cls-millie-catalog-2026-10-08',
       createdAt,
     }));
@@ -141,7 +153,7 @@ export function removeBook(books = [], id) {
 }
 
 export function isOutbound(book = {}) {
-  return ['seoul', 'duplicate', 'scan', 'millie', 'sell', 'donate', 'recycle'].includes(book.disposition);
+  return ['scan', 'duplicate_donate', 'duplicate_recycle', 'millie_donate', 'millie_recycle', 'sell'].includes(book.disposition);
 }
 
 export function filterBooks(books = [], { query = '', disposition = 'all' } = {}) {

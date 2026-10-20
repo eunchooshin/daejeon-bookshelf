@@ -27,7 +27,7 @@ import { isVerifiedMillieTitle } from './millie-catalog.js';
 
 const STORAGE_KEY = 'daejeon-bookshelf.v1';
 const MILLIE_IMPORT_KEY = 'daejeon-bookshelf.millie-catalog-2026-10-08';
-const MILLIE_IMPORT_VERSION = 'cls-121-v3';
+const MILLIE_IMPORT_VERSION = 'cls-121-v4';
 const millieLabels = { unchecked: '밀리 확인 전', full: '📱 밀리에도 있음', partial: '밀리 일부·요약', not_found: '밀리 없음' };
 const $ = (selector) => document.querySelector(selector);
 
@@ -110,10 +110,13 @@ function summaryItem(label, value) {
 
 function renderSummary() {
   elements.summary.replaceChildren(
-    summaryItem('📚 내 책장', books.length),
-    summaryItem('🚚 서울행', books.filter((book) => book.disposition === 'seoul').length),
-    summaryItem('📱 밀리로 대체', books.filter((book) => book.disposition === 'millie').length),
-    summaryItem('🚪 실물책 정리 대상', books.filter(isOutbound).length),
+    summaryItem('📚 전체', books.length),
+    summaryItem('🏠 서울 보관', books.filter((book) => book.disposition === 'keep_seoul').length),
+    summaryItem('🏡 대전 보관', books.filter((book) => book.disposition === 'keep_daejeon').length),
+    summaryItem('📄 스캔', books.filter((book) => book.disposition === 'scan').length),
+    summaryItem('👯 중복 정리', books.filter((book) => book.disposition.startsWith('duplicate_')).length),
+    summaryItem('📱 밀리 대체', books.filter((book) => book.disposition.startsWith('millie_')).length),
+    summaryItem('💰 중고 판매', books.filter((book) => book.disposition === 'sell').length),
   );
 }
 

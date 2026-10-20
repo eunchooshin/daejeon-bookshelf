@@ -21,7 +21,7 @@ test('책을 찾으면 저장 전에도 표지 미리보기를 보여준다', as
 
 test('정리 선택지는 빠르게 구분할 수 있는 이모지를 포함한다', async () => {
   const html = await readFile(new URL('index.html', root), 'utf8');
-  for (const label of ['📌 자주 참고함', '✍️ 메모·필기 있음', '💎 절판·희귀본', '🤔 판단이 안 됨', '✨ 양호', '📱 완전판 있음', '🚚 서울행']) {
+  for (const label of ['📌 자주 참고함', '✍️ 메모·필기 있음', '💎 절판·희귀본', '🤔 판단이 안 됨', '✨ 양호', '📱 완전판 있음', '🏠 보관 · 서울']) {
     assert.match(html, new RegExp(label));
   }
 });
@@ -50,36 +50,35 @@ test('검수된 밀리 목록을 내 책장에 넣고 자동 표시한다고 안
   assert.match(app, /setFormChoice\('millieStatus', 'full'\)/);
   assert.match(app, /mergeVerifiedMillieCatalog/);
   assert.match(app, /daejeon-bookshelf\.millie-catalog-2026-10-08/);
-  assert.match(app, /cls-121-v3/);
+  assert.match(app, /cls-121-v4/);
   assert.match(app, /📱 밀리에도 있음/);
 });
 
 test('책장 필터 드롭다운에도 결정별 이모지를 표시한다', async () => {
   const html = await readFile(new URL('index.html', root), 'utf8');
-  for (const option of ['🚚 서울행', '🔐 대체 불가 보관', '📱 밀리로 대체', '💰 중고 판매', '🎁 기증', '♻️ 폐기']) {
+  for (const option of ['🏠 보관 · 서울', '🏡 보관 · 대전', '👯 중복 → 🎁 기증', '👯 중복 → ♻️ 폐기', '📱 밀리 → 🎁 기증', '📱 밀리 → ♻️ 폐기', '💰 중고 판매 · 상태 좋음']) {
     assert.match(html, new RegExp(`<option[^>]*>${option}</option>`));
   }
   assert.doesNotMatch(html, /온라인 읽은 책/);
 });
 
-test('상단 요약은 이모지를 붙이고 온라인 읽은 책 대신 밀리 대체를 보여준다', async () => {
+test('상단 요약은 보관·스캔·중복·밀리·판매 체계를 이모지와 함께 보여준다', async () => {
   const app = await readFile(new URL('src/app.js', root), 'utf8');
-  assert.match(app, /summaryItem\('📚 내 책장'/);
-  assert.match(app, /summaryItem\('🚚 서울행'/);
-  assert.match(app, /summaryItem\('📱 밀리로 대체'/);
-  assert.match(app, /summaryItem\('🚪 실물책 정리 대상'/);
+  for (const label of ['📚 전체', '🏠 서울 보관', '🏡 대전 보관', '📄 스캔', '👯 중복 정리', '📱 밀리 대체', '💰 중고 판매']) {
+    assert.match(app, new RegExp(`summaryItem\\('${label}'`));
+  }
   assert.doesNotMatch(app, /summaryItem\('온라인 읽은 책'/);
 });
 
 test('새 화면과 이전 CSS가 섞이지 않도록 정적 파일 버전을 고정한다', async () => {
   const html = await readFile(new URL('index.html', root), 'utf8');
   const worker = await readFile(new URL('sw.js', root), 'utf8');
-  assert.match(html, /styles\.css\?v=0\.4\.10/);
-  assert.match(html, /src\/app\.js\?v=0\.4\.10/);
-  assert.match(worker, /styles\.css\?v=0\.4\.10/);
-  assert.match(worker, /src\/app\.js\?v=0\.4\.10/);
+  assert.match(html, /styles\.css\?v=0\.4\.11/);
+  assert.match(html, /src\/app\.js\?v=0\.4\.11/);
+  assert.match(worker, /styles\.css\?v=0\.4\.11/);
+  assert.match(worker, /src\/app\.js\?v=0\.4\.11/);
   assert.match(worker, /src\/millie-covers\.js/);
-  assert.match(worker, /book-galpi-v16/);
+  assert.match(worker, /book-galpi-v17/);
 });
 
 test('바코드 폴리필 자산을 앱 자체에서 불러온다', async () => {

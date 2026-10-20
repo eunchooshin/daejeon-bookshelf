@@ -7,7 +7,7 @@
   <meta name="description" content="대전 집 책 정리를 위한 개인용 책장과 보관·스캔·기증 결정 도우미">
   <title>책갈피 — 대전 책 정리</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=0.4.10">
+  <link rel="stylesheet" href="styles.css?v=0.4.11">
 </head>
 <body>
   <header class="topbar">
@@ -23,7 +23,7 @@
       <div>
         <p class="eyebrow">PRIVATE BOOK ORGANIZER</p>
         <h1 id="intro-title">버릴 책보다,<br><em>남길 이유</em>부터 찾기.</h1>
-        <p>“서울 집에 둘 만큼 1~2년 안에 읽거나 참고할까?”를 기준으로 서울행·대체 불가 보관·판매·기부·보류를 결정하세요.</p>
+        <p>서울·대전 보관, 스캔, 중복·밀리 대체 후 기증·폐기, 상태 좋은 책의 중고 판매까지 한 기준으로 정리하세요.</p>
       </div>
       <div id="summary" class="summary" aria-label="책장 요약"></div>
     </section>
@@ -112,14 +112,13 @@
           <details class="criteria-guide">
             <summary>🧭 최종 결정 기준 보기</summary>
             <div class="criteria-list">
-              <p><strong>🚚 서울행</strong><span>앞으로 1~2년 안에 확실히 읽거나 자주 참고할 책</span></p>
-              <p><strong>🔐 대체 불가 보관</strong><span>절판·전문자료·필기가 있어 다시 구하기 어려운 책</span></p>
-              <p><strong>👯 중복 정리</strong><span>서울에도 같은 책이 있어 상태 좋은 1권만 남길 때</span></p>
-              <p><strong>💰 중고 판매·🎁 기증</strong><span>다시 구하기 쉽고 읽을 시점이 불분명한 책</span></p>
+              <p><strong>🏠 보관 · 서울</strong><span>앞으로 1~2년 안에 확실히 읽거나 자주 참고할 책</span></p>
+              <p><strong>🏡 보관 · 대전</strong><span>절판·전문자료·필기가 있어 대전에 남길 책</span></p>
+              <p><strong>📄 스캔</strong><span>필요한 내용만 디지털로 남기면 충분한 책</span></p>
+              <p><strong>👯 중복 → 기증·폐기</strong><span>상태가 좋으면 기증하고 훼손됐으면 폐기</span></p>
+              <p><strong>📱 밀리 → 기증·폐기</strong><span>밀리로 대체하고 상태가 좋으면 기증, 훼손됐으면 폐기</span></p>
+              <p><strong>💰 중고 판매</strong><span>상태가 좋은 책만 판매</span></p>
               <p><strong>📦 보류 상자</strong><span>지금 결정하기 어렵다면 보류 상자 1개에만 보관</span></p>
-              <p><strong>📱 밀리로 대체</strong><span>밀리에 완전판이 있고 실물책을 가까운 시일에 보지 않을 때</span></p>
-              <p><strong>📄 자가 스캔</strong><span>일부 내용만 디지털로 남기면 충분할 때</span></p>
-              <p><strong>♻️ 폐기</strong><span>심하게 훼손·오염되어 판매나 기증이 어려울 때</span></p>
             </div>
           </details>
 
@@ -127,15 +126,15 @@
             <legend>최종 결정</legend>
             <div class="choice-grid choice-grid-two">
               <label><input type="radio" name="disposition" value="auto" checked><span>✨ 자동 추천</span></label>
-              <label><input type="radio" name="disposition" value="seoul"><span>🚚 서울행</span></label>
-              <label><input type="radio" name="disposition" value="keep"><span>🔐 대체 불가 보관</span></label>
-              <label><input type="radio" name="disposition" value="duplicate"><span>👯 중복 정리</span></label>
-              <label><input type="radio" name="disposition" value="sell"><span>💰 중고 판매</span></label>
-              <label><input type="radio" name="disposition" value="donate"><span>🎁 기증</span></label>
+              <label><input type="radio" name="disposition" value="keep_seoul"><span>🏠 보관 · 서울</span></label>
+              <label><input type="radio" name="disposition" value="keep_daejeon"><span>🏡 보관 · 대전</span></label>
+              <label><input type="radio" name="disposition" value="scan"><span>📄 스캔</span></label>
+              <label><input type="radio" name="disposition" value="duplicate_donate"><span>👯 중복 → 🎁 기증</span></label>
+              <label><input type="radio" name="disposition" value="duplicate_recycle"><span>👯 중복 → ♻️ 폐기</span></label>
+              <label><input type="radio" name="disposition" value="millie_donate"><span>📱 밀리 → 🎁 기증</span></label>
+              <label><input type="radio" name="disposition" value="millie_recycle"><span>📱 밀리 → ♻️ 폐기</span></label>
+              <label><input type="radio" name="disposition" value="sell"><span>💰 중고 판매 · 상태 좋음</span></label>
               <label><input type="radio" name="disposition" value="defer"><span>📦 보류 상자</span></label>
-              <label><input type="radio" name="disposition" value="millie"><span>📱 밀리로 대체</span></label>
-              <label><input type="radio" name="disposition" value="scan"><span>📄 자가 스캔</span></label>
-              <label><input type="radio" name="disposition" value="recycle"><span>♻️ 폐기</span></label>
             </div>
           </fieldset>
 
@@ -163,7 +162,7 @@
         <div class="toolbar">
           <label class="search-box"><span class="sr-only">책 검색</span><input id="search" type="search" placeholder="제목, 저자, ISBN, 박스 검색"></label>
           <select id="disposition-filter" aria-label="정리 결정 필터">
-            <option value="all">🗂️ 모든 결정</option><option value="seoul">🚚 서울행</option><option value="keep">🔐 대체 불가 보관</option><option value="duplicate">👯 중복 정리</option><option value="sell">💰 중고 판매</option><option value="donate">🎁 기증</option><option value="defer">📦 보류 상자</option><option value="millie">📱 밀리로 대체</option><option value="scan">📄 자가 스캔</option><option value="recycle">♻️ 폐기</option>
+            <option value="all">🗂️ 모든 결정</option><option value="keep_seoul">🏠 보관 · 서울</option><option value="keep_daejeon">🏡 보관 · 대전</option><option value="scan">📄 스캔</option><option value="duplicate_donate">👯 중복 → 🎁 기증</option><option value="duplicate_recycle">👯 중복 → ♻️ 폐기</option><option value="millie_donate">📱 밀리 → 🎁 기증</option><option value="millie_recycle">📱 밀리 → ♻️ 폐기</option><option value="sell">💰 중고 판매 · 상태 좋음</option><option value="defer">📦 보류 상자</option>
           </select>
         </div>
 
@@ -193,6 +192,6 @@
     window.BookBarcodeDetectorPolyfill = barcodeDetectorPolyfill.BarcodeDetectorPolyfill;
     window.BookBarcodeDetector = window.BarcodeDetector || window.BookBarcodeDetectorPolyfill;
   </script>
-  <script type="module" src="src/app.js?v=0.4.10"></script>
+  <script type="module" src="src/app.js?v=0.4.11"></script>
 </body>
 </html>
