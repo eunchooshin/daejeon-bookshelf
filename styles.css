@@ -183,6 +183,9 @@ dialog::backdrop { background: rgba(24,28,24,.68); }
   .summary-item strong { margin-top: 12px; }
   .workspace { padding-top: 24px; gap: 30px; }
   .form-panel { padding: 18px 14px; }
+  .input-actions { grid-template-columns: 1fr 1fr; }
+  .input-actions > * { min-width: 0; width: 100%; white-space: normal; }
+  .input-actions > input[name="isbn"] { grid-column: 1 / -1; }
   .two-columns, .millie-row, .toolbar { grid-template-columns: 1fr; }
   .millie-row .button { margin-top: -10px; }
   .book-card { grid-template-columns: 58px minmax(0, 1fr); gap: 12px; }

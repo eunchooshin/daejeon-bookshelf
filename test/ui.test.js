@@ -105,15 +105,22 @@ test('책장 필터와 상단 요약은 새 실물 목적지만 보여준다', a
   }
 });
 
+test('모바일 ISBN 입력 버튼은 화면 너비를 넘지 않는다', async () => {
+  const css = await source('styles.css');
+  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.input-actions\s*\{[^}]*grid-template-columns:\s*1fr 1fr/);
+  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.input-actions > input\[name="isbn"\]\s*\{[^}]*grid-column:\s*1 \/ -1/);
+  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.input-actions > \*\s*\{[^}]*min-width:\s*0/);
+});
+
 test('새 화면과 이전 CSS가 섞이지 않도록 정적 파일 버전을 고정한다', async () => {
   const html = await source('index.html');
   const worker = await source('sw.js');
-  assert.match(html, /styles\.css\?v=0\.4\.19/);
-  assert.match(html, /src\/app\.js\?v=0\.4\.19/);
-  assert.match(worker, /styles\.css\?v=0\.4\.19/);
-  assert.match(worker, /src\/app\.js\?v=0\.4\.19/);
+  assert.match(html, /styles\.css\?v=0\.4\.20/);
+  assert.match(html, /src\/app\.js\?v=0\.4\.20/);
+  assert.match(worker, /styles\.css\?v=0\.4\.20/);
+  assert.match(worker, /src\/app\.js\?v=0\.4\.20/);
   assert.match(worker, /src\/pdf-catalog\.js/);
-  assert.match(worker, /book-galpi-v25/);
+  assert.match(worker, /book-galpi-v26/);
 });
 
 test('바코드 폴리필 자산을 앱 자체에서 불러온다', async () => {
